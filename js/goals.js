@@ -242,15 +242,17 @@ const GoalManager = {
     }
 
     // Calculate current progress
-    const latestScores = history[history.length - 1].scores;
-    const currentCategoryScore = latestScores[goal.currentThreshold];
+    const latestAttempt = history[history.length - 1];
+    const latestScores = latestAttempt.scores || latestAttempt.categoryScores || {};
+    const currentCategoryScore = latestScores[goal.currentThreshold] || latestAttempt.score || 0;
     const currentProgress = Math.round(
       ((currentCategoryScore - goal.baselineThreshold) / (goal.targetScore - goal.baselineThreshold)) * 100
     );
 
     // Calculate previous progress
-    const previousScores = history[history.length - 2].scores;
-    const previousCategoryScore = previousScores[goal.currentThreshold];
+    const previousAttempt = history[history.length - 2];
+    const previousScores = previousAttempt.scores || previousAttempt.categoryScores || {};
+    const previousCategoryScore = previousScores[goal.currentThreshold] || previousAttempt.score || 0;
     const previousProgress = Math.round(
       ((previousCategoryScore - goal.baselineThreshold) / (goal.targetScore - goal.baselineThreshold)) * 100
     );

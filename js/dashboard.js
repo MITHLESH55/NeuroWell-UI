@@ -59,19 +59,29 @@ const DashboardManager = {
       AppManager.hideLoader();
 
       // Fallback to local data
-      const scoreReport = ScoringEngine.getScoreReport();
-      if (scoreReport) {
-        DashboardManager.renderCircularProgress(scoreReport);
-        DashboardManager.renderScoreInsights(scoreReport);
-        DashboardManager.renderOverviewCards(scoreReport);
-        DashboardManager.renderCategoryChart(scoreReport);
-        DashboardManager.renderBurnoutGaugeSpeedometer(scoreReport);
-        DashboardManager.renderWellnessProjection(scoreReport);
-        DashboardManager.renderAssessmentTrendAnalysis(scoreReport);
-        DashboardManager.renderTrendChart(scoreReport);
-        console.log('✅ Dashboard loaded from local storage');
-      } else {
-        DashboardManager.showNoDataView();
+      try {
+        const scoreReport = ScoringEngine.getScoreReport();
+        if (scoreReport) {
+          DashboardManager.renderCircularProgress(scoreReport);
+          DashboardManager.renderScoreInsights(scoreReport);
+          DashboardManager.renderOverviewCards(scoreReport);
+          DashboardManager.renderCategoryChart(scoreReport);
+          DashboardManager.renderBurnoutGaugeSpeedometer(scoreReport);
+          DashboardManager.renderWellnessProjection(scoreReport);
+          DashboardManager.renderAssessmentTrendAnalysis(scoreReport);
+          DashboardManager.renderTrendChart(scoreReport);
+          console.log('✅ Dashboard loaded from local storage');
+        } else {
+          DashboardManager.showNoDataView();
+        }
+      } catch (nestedError) {
+        const container = document.getElementById('scoreInsights');
+        if (container) {
+          container.innerHTML = '<div style="color:red; background:rgba(255,0,0,0.1); padding:10px; border-radius:8px;">' + 
+            '<strong>Dashboard Crash:</strong> ' + nestedError.message + 
+            '<br><small>' + nestedError.stack + '</small></div>';
+        }
+        console.error('Fatal crash:', nestedError);
       }
     }
   },
@@ -726,16 +736,26 @@ const DashboardManager = {
       return [];
     }
     // Return last 5 attempts (or fewer if less than 5 exist)
-    return history.slice(-5).map((attempt, idx) => ({
-      attemptNumber: idx + 1,
-      score: attempt.scores.overall,
-      physical: attempt.scores.physical,
-      mental: attempt.scores.mental,
-      emotional: attempt.scores.emotional,
-      timestamp: new Date(attempt.timestamp),
-      date: new Date(attempt.timestamp).toLocaleDateString(),
-      time: new Date(attempt.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }));
+    return history.slice(-5).map((attempt, idx) => {
+      // Safely extract scores to support older data formats
+      const scores = attempt.scores || attempt.categoryScores || {
+        overall: attempt.score || 0,
+        physical: attempt.score || 0,
+        mental: attempt.score || 0,
+        emotional: attempt.score || 0
+      };
+
+      return {
+        attemptNumber: idx + 1,
+        score: scores.overall || 0,
+        physical: scores.physical || 0,
+        mental: scores.mental || 0,
+        emotional: scores.emotional || 0,
+        timestamp: new Date(attempt.timestamp || Date.now()),
+        date: new Date(attempt.timestamp || Date.now()).toLocaleDateString(),
+        time: new Date(attempt.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+    });
   },
 
   /**

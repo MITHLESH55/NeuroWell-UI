@@ -181,8 +181,12 @@ const ScoringEngine = {
     const latest = history[history.length - 1];
     const previous = history[history.length - 2];
     
-    const latestStress = 100 - latest.scores.mental;
-    const previousStress = 100 - previous.scores.mental;
+    // Safely extract mental scores, falling back to older formats if needed
+    const latestMental = latest.scores?.mental || latest.categoryScores?.mental || latest.score || 0;
+    const previousMental = previous.scores?.mental || previous.categoryScores?.mental || previous.score || 0;
+    
+    const latestStress = 100 - latestMental;
+    const previousStress = 100 - previousMental;
     const change = latestStress - previousStress;
 
     let trend = 'stable';
@@ -309,8 +313,8 @@ const ScoringEngine = {
       burnoutStatus: burnoutStatus,
       trend: trend,
       suggestions: suggestions,
-      lastUpdated: responses.timestamp,
-      nextRecommendedDate: new Date(new Date(responses.timestamp).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      lastUpdated: responses.timestamp || new Date().toISOString(),
+      nextRecommendedDate: new Date(new Date(responses.timestamp || Date.now()).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString()
     };
   }
 };
