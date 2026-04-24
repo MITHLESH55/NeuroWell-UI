@@ -12,31 +12,46 @@ function initRecommendations() {
   const container = document.getElementById('recommendationsContainer');
   if (!container) return;
 
-  // 1. Fetch data from localStorage
-  const scoreData = StorageManager.getWellnessScore();
-  
-  if (!scoreData || !scoreData.scores) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">📋</div>
-        <h3>No Assessment Data</h3>
-        <p>Complete an assessment to see personalized recommendations.</p>
-        <a href="assessment.html" class="btn btn-primary">Start Assessment</a>
-      </div>
-    `;
-    return;
+  try {
+    // 1. Fetch data from localStorage
+    const scoreData = StorageManager.getWellnessScore();
+    
+    if (!scoreData || !scoreData.scores) {
+      showEmptyState(container);
+      return;
+    }
+
+    const scoreEnvelope = scoreData.scores || scoreData;
+    const scores = scoreEnvelope.categoryScores || scoreEnvelope.scores || scoreEnvelope;
+
+    // Validate scores object
+    if (typeof scores !== 'object' || scores === null) {
+      throw new Error('Invalid score data format');
+    }
+
+    // 2. Call recommendation engine
+    const recs = SmartRecommendationEngine.generateRecommendations(scores);
+
+    // 3. Dynamically render UI
+    renderRiskInsights(scores);
+    renderPersonalizedRecommendations(scores, recs);
+    renderExpertSuggestions(recs.doctors);
+
+  } catch (error) {
+    console.error('❌ Error rendering recommendations:', error);
+    showEmptyState(container);
   }
+}
 
-  const scoreEnvelope = scoreData.scores || scoreData;
-  const scores = scoreEnvelope.categoryScores || scoreEnvelope.scores || scoreEnvelope;
-
-  // 2. Call recommendation engine
-  const recs = SmartRecommendationEngine.generateRecommendations(scores);
-
-  // 3. Dynamically render UI
-  renderRiskInsights(scores);
-  renderPersonalizedRecommendations(scores, recs);
-  renderExpertSuggestions(recs.doctors);
+function showEmptyState(container) {
+  container.innerHTML = `
+    <div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <h3>No Assessment Data or Corrupted Data</h3>
+      <p>Please complete a new assessment to see personalized recommendations.</p>
+      <a href="assessment.html" class="btn btn-primary">Start Assessment</a>
+    </div>
+  `;
 }
 
 function getBadgeHTML(score) {

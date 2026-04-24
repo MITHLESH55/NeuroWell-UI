@@ -49,10 +49,7 @@ const DashboardManager = {
       DashboardManager.renderBurnoutGaugeSpeedometer(scoreReport);
       DashboardManager.renderWellnessProjection(scoreReport);
       DashboardManager.renderAssessmentTrendAnalysis(scoreReport);
-      DashboardManager.renderGoals(scoreReport);
       DashboardManager.renderTrendChart(scoreReport);
-      DashboardManager.renderMetrics(scoreReport);
-      DashboardManager.renderRecommendations(scoreReport);
 
       AppManager.hideLoader();
       console.log('✅ Dashboard Ready');
@@ -71,10 +68,7 @@ const DashboardManager = {
         DashboardManager.renderBurnoutGaugeSpeedometer(scoreReport);
         DashboardManager.renderWellnessProjection(scoreReport);
         DashboardManager.renderAssessmentTrendAnalysis(scoreReport);
-        DashboardManager.renderGoals(scoreReport);
         DashboardManager.renderTrendChart(scoreReport);
-        DashboardManager.renderMetrics(scoreReport);
-        DashboardManager.renderRecommendations(scoreReport);
         console.log('✅ Dashboard loaded from local storage');
       } else {
         DashboardManager.showNoDataView();
