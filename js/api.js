@@ -151,17 +151,12 @@ const APIService = {
     // Calculate burnout risk locally
     const risk = ScoringEngine.calculateBurnoutRisk(scores);
 
-    // Generate recommendations locally
-    const recommendations = await RecommendationEngine.generateRecommendations({
-      categoryScores: scores,
-      risk: risk
-    });
-
+    // Recommendations are now generated on-the-fly in the recommendations page.
     return {
       id: 'local-' + Date.now(),
       score: scores.overall,
       categoryScores: scores,
-      recommendations: recommendations,
+      scores: scores, // Ensure compatibility with new recommendation engine
       risk: risk,
       isLocalFallback: true
     };
