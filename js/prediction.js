@@ -45,8 +45,10 @@ const PredictionEngine = {
     if (history.length >= 2) {
       const recent = history[history.length - 1];
       const previous = history[history.length - 2];
-      velocity = (recent.scores.overall - previous.scores.overall) /
-                 ((new Date(recent.timestamp) - new Date(previous.timestamp)) / (1000 * 60 * 60 * 24));
+      const recentOverall = recent.scores?.overall || recent.categoryScores?.overall || recent.score || 0;
+      const previousOverall = previous.scores?.overall || previous.categoryScores?.overall || previous.score || 0;
+      velocity = (recentOverall - previousOverall) /
+                 ((new Date(recent.timestamp || Date.now()) - new Date(previous.timestamp || Date.now())) / (1000 * 60 * 60 * 24));
     }
 
     // Generate 30-day predictions (daily for display)
@@ -89,7 +91,7 @@ const PredictionEngine = {
     // Calculate consistency (standard deviation of recent scores)
     let consistency = 0;
     if (history.length > 1) {
-      const recentScores = history.slice(-4).map(h => h.scores.overall);
+      const recentScores = history.slice(-4).map(h => h.scores?.overall || h.categoryScores?.overall || h.score || 0);
       const mean = recentScores.reduce((a, b) => a + b) / recentScores.length;
       const squaredDifferences = recentScores.map(score => Math.pow(score - mean, 2));
       const variance = squaredDifferences.reduce((a, b) => a + b) / recentScores.length;
@@ -193,7 +195,9 @@ const PredictionEngine = {
     if (history.length >= 2) {
       const recent = history[history.length - 1];
       const previous = history[history.length - 2];
-      const decline = previous.scores.overall - recent.scores.overall;
+      const recentOverall = recent.scores?.overall || recent.categoryScores?.overall || recent.score || 0;
+      const previousOverall = previous.scores?.overall || previous.categoryScores?.overall || previous.score || 0;
+      const decline = previousOverall - recentOverall;
 
       if (decline > 20) {
         warnings.signals.push({
@@ -325,8 +329,8 @@ const PredictionEngine = {
     const chartData = {
       historical: history.map((h, idx) => ({
         label: `${idx + 1}`,
-        value: h.scores.overall,
-        date: new Date(h.timestamp).toLocaleDateString()
+        value: h.scores?.overall || h.categoryScores?.overall || h.score || 0,
+        date: new Date(h.timestamp || Date.now()).toLocaleDateString()
       })),
       predicted: trajectory.predictions.map(p => ({
         label: `Day ${p.day}`,
