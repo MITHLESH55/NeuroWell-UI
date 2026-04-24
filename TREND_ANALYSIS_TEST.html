@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trend Analysis Test - NeuroWell</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .test-container {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .test-section {
+      background: var(--bg-secondary);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border-radius: 0.5rem;
+      border-left: 4px solid #667eea;
+    }
+    .test-controls {
+      display: grid;
+      gap: 1rem;
+    }
+    .test-button {
+      padding: 0.75rem 1.5rem;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .test-button:hover {
+      background: #764ba2;
+      transform: translateY(-2px);
+    }
+    .test-output {
+      background: var(--bg-tertiary);
+      padding: 1rem;
+      border-radius: 0.375rem;
+      margin-top: 1rem;
+      font-family: monospace;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #cbd5e1;
+    }
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+    .info { color: #3b82f6; }
+    .warning { color: #f59e0b; }
+  </style>
+</head>
+<body data-page="test">
+  <div class="test-container">
+    <h1>🧪 NeuroWell Trend Analysis Test Suite</h1>
+    <p>Test the trend analysis feature with simulated assessment data</p>
+
+    <!-- Test Controls -->
+    <div class="test-section">
+      <h2>Test Controls</h2>
+      <div class="test-controls">
+        <button class="test-button" onclick="clearStorage()">🗑️ Clear All Storage</button>
+        <button class="test-button" onclick="addSingleAssessment()">➕ Add Single Assessment</button>
+        <button class="test-button" onclick="addMultipleAssessments()">📊 Add 5 Assessments (Uptrend)</button>
+        <button class="test-button" onclick="addDowntrendAssessments()">📉 Add 5 Assessments (Downtrend)</button>
+        <button class="test-button" onclick="addMixedTrendAssessments()">📈📉 Add 5 Assessments (Mixed)</button>
+        <button class="test-button" onclick="viewStorageData()">👁️ View Storage Data</button>
+        <button class="test-button" onclick="runDashboardTest()">🚀 Launch Dashboard</button>
+      </div>
+    </div>
+
+    <!-- Output Area -->
+    <div class="test-section">
+      <h2>Test Output</h2>
+      <div id="testOutput" class="test-output">Ready for testing...</div>
+    </div>
+
+    <!-- Documentation -->
+    <div class="test-section">
+      <h2>📖 Test Guide</h2>
+      <p>1. Click "Clear All Storage" to start fresh</p>
+      <p>2. Add assessments using one of the available options</p>
+      <p>3. View the storage data to verify it was saved correctly</p>
+      <p>4. Launch the dashboard to see the trend analysis visualization</p>
+      <p>5. Verify the chart shows smooth curves and correct improvement indicators</p>
+    </div>
+  </div>
+
+  <script src="data/constants.js"></script>
+  <script src="data/questions.js"></script>
+  <script src="data/rules.js"></script>
+  <script src="frontend/js/storage.js"></script>
+  <script src="frontend/js/scoring.js"></script>
+
+  <script>
+    const output = document.getElementById('testOutput');
+
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const prefix = {
+        'success': '✅',
+        'error': '❌',
+        'info': 'ℹ️',
+        'warning': '⚠️'
+      }[type] || '•';
+      
+      const line = `[${timestamp}] ${prefix} ${message}`;
+      output.innerHTML += `<div class="${type}">${line}</div>`;
+      output.scrollTop = output.scrollHeight;
+      console.log(line);
+    }
+
+    function clearStorage() {
+      log('Clearing all storage...', 'warning');
+      StorageManager.clearAllData();
+      log('✓ All data cleared', 'success');
+    }
+
+    function generateScore(base, variance = 10) {
+      const variation = (Math.random() - 0.5) * variance;
+      return Math.max(0, Math.min(100, Math.round(base + variation)));
+    }
+
+    function addSingleAssessment() {
+      log('Adding single assessment...', 'info');
+      try {
+        const scores = {
+          overall: generateScore(65),
+          physical: generateScore(70),
+          mental: generateScore(60),
+          emotional: generateScore(68)
+        };
+        
+        StorageManager.saveHistoricalData(scores);
+        log(`Added assessment: Overall=${scores.overall}%, Physical=${scores.physical}%, Mental=${scores.mental}%, Emotional=${scores.emotional}%`, 'success');
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    function addMultipleAssessments() {
+      log('Adding 5 assessments with uptrend...', 'info');
+      try {
+        const baseScores = [55, 60, 68, 72, 78];
+        
+        baseScores.forEach((base, idx) => {
+          const scores = {
+            overall: generateScore(base, 5),
+            physical: generateScore(base + 5, 5),
+            mental: generateScore(base, 5),
+            emotional: generateScore(base + 3, 5)
+          };
+          
+          StorageManager.saveHistoricalData(scores);
+          
+          // Add delay between saves for realistic timestamps
+          setTimeout(() => {
+            log(`Assessment ${idx + 1}: Overall=${scores.overall}%`, 'info');
+          }, idx * 100);
+        });
+        
+        log('✓ Added 5 assessments with upward trend', 'success');
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    function addDowntrendAssessments() {
+      log('Adding 5 assessments with downtrend...', 'info');
+      try {
+        const baseScores = [82, 76, 70, 64, 58];
+        
+        baseScores.forEach((base, idx) => {
+          const scores = {
+            overall: generateScore(base, 5),
+            physical: generateScore(base - 5, 5),
+            mental: generateScore(base - 3, 5),
+            emotional: generateScore(base, 5)
+          };
+          
+          StorageManager.saveHistoricalData(scores);
+          
+          setTimeout(() => {
+            log(`Assessment ${idx + 1}: Overall=${scores.overall}%`, 'warning');
+          }, idx * 100);
+        });
+        
+        log('✓ Added 5 assessments with downward trend', 'success');
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    function addMixedTrendAssessments() {
+      log('Adding 5 assessments with mixed trend...', 'info');
+      try {
+        const baseScores = [65, 72, 68, 75, 70];
+        
+        baseScores.forEach((base, idx) => {
+          const scores = {
+            overall: generateScore(base, 8),
+            physical: generateScore(base + 5, 8),
+            mental: generateScore(base - 3, 8),
+            emotional: generateScore(base + 2, 8)
+          };
+          
+          StorageManager.saveHistoricalData(scores);
+          
+          setTimeout(() => {
+            log(`Assessment ${idx + 1}: Overall=${scores.overall}%`, 'info');
+          }, idx * 100);
+        });
+        
+        log('✓ Added 5 assessments with mixed trend', 'success');
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    function viewStorageData() {
+      log('Retrieving storage data...', 'info');
+      try {
+        const history = StorageManager.getHistoricalData();
+        log(`Found ${history.length} assessments in storage`, 'info');
+        
+        if (history.length === 0) {
+          log('No historical data found. Add assessments first.', 'warning');
+          return;
+        }
+
+        history.forEach((record, idx) => {
+          const date = new Date(record.timestamp).toLocaleString();
+          const scores = record.scores;
+          log(
+            `[Attempt ${idx + 1}] ${date}\n` +
+            `  Overall: ${scores.overall}%\n` +
+            `  Physical: ${scores.physical}%\n` +
+            `  Mental: ${scores.mental}%\n` +
+            `  Emotional: ${scores.emotional}%`,
+            'success'
+          );
+        });
+
+        // Test trend analysis calculations
+        log('Testing trend analysis calculations...', 'info');
+        const lastFive = history.slice(-5);
+        if (lastFive.length >= 2) {
+          for (let i = 1; i < lastFive.length; i++) {
+            const prev = lastFive[i - 1].scores.overall;
+            const curr = lastFive[i].scores.overall;
+            const change = curr - prev;
+            const pct = prev !== 0 ? ((change / prev) * 100).toFixed(1) : 0;
+            const label = change > 0 
+              ? `+${pct}% improvement` 
+              : change < 0 
+                ? `${pct}% decline` 
+                : 'Stable';
+            log(`Attempt ${i + 1}: ${label} (${prev}% → ${curr}%)`, change > 0 ? 'success' : change < 0 ? 'warning' : 'info');
+          }
+        }
+
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    function runDashboardTest() {
+      log('Launching dashboard...', 'info');
+      try {
+        const history = StorageManager.getHistoricalData();
+        if (history.length === 0) {
+          log('No assessment data found. Add assessments first.', 'warning');
+          return;
+        }
+        log('Opening dashboard.html', 'success');
+        window.location.href = 'frontend/dashboard.html';
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    // Initial log
+    log('Test suite loaded successfully', 'success');
+    log(`Storage available: ${StorageManager.isAvailable()}`, 'info');
+    const existingData = StorageManager.getHistoricalData();
+    log(`Current assessments in storage: ${existingData.length}`, 'info');
+  </script>
+</body>
+</html>

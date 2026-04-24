@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroWell - AI-Driven Predictive Wellness Intelligence Platform</title>
+  <meta name="description"
+    content="Unlock your healthiest future with NeuroWell's AI-powered wellness assessment, progress tracking, and personalized recommendations.">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    /* ===== HERO SECTION ===== */
+    .nw-hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .nw-hero__bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .nw-hero__bg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.35;
+    }
+
+    .nw-hero__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg,
+          rgba(15, 23, 42, 0.95) 0%,
+          rgba(15, 23, 42, 0.80) 40%,
+          rgba(109, 40, 217, 0.25) 100%);
+      z-index: 1;
+    }
+
+    /* Floating ambient orbs */
+    .nw-hero__orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      z-index: 1;
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .nw-hero__orb--1 {
+      width: 500px;
+      height: 500px;
+      background: rgba(139, 92, 246, 0.15);
+      top: -10%;
+      right: -5%;
+    }
+
+    .nw-hero__orb--2 {
+      width: 400px;
+      height: 400px;
+      background: rgba(250, 204, 21, 0.08);
+      bottom: -10%;
+      left: 5%;
+      animation-delay: -4s;
+    }
+
+    .nw-hero__orb--3 {
+      width: 300px;
+      height: 300px;
+      background: rgba(59, 130, 246, 0.1);
+      top: 40%;
+      left: 35%;
+      animation-delay: -2s;
+    }
+
+    .nw-hero__inner {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 6rem 1.5rem 4rem;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 4rem;
+      align-items: center;
+      width: 100%;
+    }
+
+    /* Left side - Hero text */
+    .nw-hero__text {
+      animation: slideInLeft 0.8s ease-out both;
+    }
+
+    .nw-hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 1.1rem;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      color: var(--primary-light);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .nw-hero__badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    .nw-hero__heading {
+      font-size: clamp(2.5rem, 4.5vw, 3.75rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+      color: #f8fafc;
+      margin-bottom: 1.5rem;
+    }
+
+    .nw-hero__heading .accent {
+      color: var(--accent);
+      position: relative;
+    }
+
+    .nw-hero__heading .gradient {
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nw-hero__subtext {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: rgba(203, 213, 245, 0.85);
+      max-width: 520px;
+      margin-bottom: 2.25rem;
+    }
+
+    .nw-hero__actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .nw-hero__actions .btn-lg {
+      padding: 0.95rem 2.2rem;
+      font-size: 1rem;
+    }
+
+    /* Stats bar under hero text */
+    .nw-hero__stats {
+      display: flex;
+      gap: 2.5rem;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .nw-hero__stat-item {
+      text-align: left;
+    }
+
+    .nw-hero__stat-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -0.02em;
+    }
+
+    .nw-hero__stat-value .accent {
+      color: var(--accent);
+    }
+
+    .nw-hero__stat-label {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      margin-top: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Right side - Glass card */
+    .nw-hero__card {
+      animation: slideInRight 0.8s ease-out 0.2s both;
+    }
+
+    .nw-glass-panel {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 2.25rem;
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      transition: all 0.4s ease;
+    }
+
+    .nw-glass-panel:hover {
+      border-color: rgba(139, 92, 246, 0.25);
+      box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(139, 92, 246, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transform: translateY(-4px);
+    }
+
+    .nw-glass-panel__title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 0.35rem;
+    }
+
+    .nw-glass-panel__subtitle {
+      font-size: 0.9rem;
+      color: var(--text-tertiary);
+      margin-bottom: 1.75rem;
+    }
+
+    .nw-glass-panel__actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .nw-action-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.95rem 1.25rem;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--text-primary);
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .nw-action-item:hover {
+      background: rgba(139, 92, 246, 0.12);
+      border-color: rgba(139, 92, 246, 0.25);
+      transform: translateX(4px);
+      color: white;
+    }
+
+    .nw-action-item__icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .nw-action-item__icon--purple {
+      background: rgba(139, 92, 246, 0.15);
+    }
+
+    .nw-action-item__icon--blue {
+      background: rgba(59, 130, 246, 0.15);
+    }
+
+    .nw-action-item__icon--green {
+      background: rgba(16, 185, 129, 0.15);
+    }
+
+    .nw-action-item__icon--amber {
+      background: rgba(245, 158, 11, 0.15);
+    }
+
+    .nw-action-item__text {
+      flex: 1;
+    }
+
+    .nw-action-item__label {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .nw-action-item__desc {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      margin-top: 0.15rem;
+    }
+
+    .nw-action-item__arrow {
+      color: var(--text-tertiary);
+      transition: all 0.3s ease;
+      font-size: 1.1rem;
+    }
+
+    .nw-action-item:hover .nw-action-item__arrow {
+      color: var(--primary-light);
+      transform: translateX(4px);
+    }
+
+    /* ===== FEATURES SECTION ===== */
+    .nw-features {
+      position: relative;
+      z-index: 2;
+      padding: 5rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .nw-features__header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .nw-features__header h2 {
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: white;
+      margin-bottom: 0.75rem;
+    }
+
+    .nw-features__header p {
+      color: var(--text-tertiary);
+      font-size: 1.05rem;
+      max-width: 550px;
+      margin: 0 auto;
+    }
+
+    .nw-features__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .nw-feature-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      padding: 2rem;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nw-feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--primary-gradient);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .nw-feature-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(139, 92, 246, 0.2);
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .nw-feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .nw-feature-card__icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .nw-feature-card h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 0.65rem;
+    }
+
+    .nw-feature-card p {
+      color: rgba(203, 213, 245, 0.7);
+      line-height: 1.7;
+      font-size: 0.92rem;
+    }
+
+    /* ===== CTA BANNER ===== */
+    .nw-cta {
+      max-width: 1200px;
+      margin: 0 auto 4rem;
+      padding: 0 1.5rem;
+    }
+
+    .nw-cta__inner {
+      background: var(--primary-gradient);
+      border-radius: 24px;
+      padding: 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nw-cta__inner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.1), transparent 60%);
+    }
+
+    .nw-cta__inner h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 0.75rem;
+      position: relative;
+    }
+
+    .nw-cta__inner p {
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 1.75rem;
+      position: relative;
+    }
+
+    .nw-cta__inner .btn {
+      position: relative;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .nw-hero__inner {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 7rem 1.5rem 3rem;
+        gap: 2.5rem;
+      }
+
+      .nw-hero__subtext {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .nw-hero__actions {
+        justify-content: center;
+      }
+
+      .nw-hero__stats {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .nw-hero__heading {
+        font-size: 2rem;
+      }
+
+      .nw-hero__stats {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .nw-hero__stat-item {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+
+<body data-page="index">
+  <div id="navbar-container"></div>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="nw-hero" id="heroSection">
+    <div class="nw-hero__bg">
+      <img src="assets/hero-bg.png" alt="" aria-hidden="true">
+    </div>
+    <div class="nw-hero__overlay"></div>
+    <div class="nw-hero__orb nw-hero__orb--1"></div>
+    <div class="nw-hero__orb nw-hero__orb--2"></div>
+    <div class="nw-hero__orb nw-hero__orb--3"></div>
+
+    <div class="nw-hero__inner">
+      <!-- Left: Hero Text -->
+      <div class="nw-hero__text">
+        <div class="nw-hero__badge">AI Wellness Platform</div>
+        <h1 class="nw-hero__heading">
+          <span class="accent">AI-Powered</span><br>
+          Wellness<br>
+          <span class="gradient">Platform</span>
+        </h1>
+        <p class="nw-hero__subtext">
+          Unlock your healthiest future with intelligent wellness assessment, real-time progress tracking, and
+          AI-powered recommendations tailored to your body, mind, and emotions.
+        </p>
+        <div class="nw-hero__actions">
+          <a href="assessment.html" class="btn btn-primary btn-lg">
+            Start Assessment
+          </a>
+          <a href="dashboard.html" class="btn btn-secondary btn-lg">
+            View Dashboard →
+          </a>
+        </div>
+
+        <div class="nw-hero__stats">
+          <div class="nw-hero__stat-item">
+            <div class="nw-hero__stat-value">15<span class="accent">+</span></div>
+            <div class="nw-hero__stat-label">Wellness Metrics</div>
+          </div>
+          <div class="nw-hero__stat-item">
+            <div class="nw-hero__stat-value">AI</div>
+            <div class="nw-hero__stat-label">Powered Engine</div>
+          </div>
+          <div class="nw-hero__stat-item">
+            <div class="nw-hero__stat-value">30<span class="accent">d</span></div>
+            <div class="nw-hero__stat-label">Trend Analysis</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Glass Card -->
+      <div class="nw-hero__card">
+        <div class="nw-glass-panel">
+          <h2 class="nw-glass-panel__title">Quick Access</h2>
+          <p class="nw-glass-panel__subtitle">Jump into your wellness journey</p>
+
+          <div class="nw-glass-panel__actions">
+            <a href="assessment.html" class="nw-action-item">
+              <div class="nw-action-item__icon nw-action-item__icon--purple"></div>
+              <div class="nw-action-item__text">
+                <div class="nw-action-item__label">Smart Assessment</div>
+                <div class="nw-action-item__desc">15 adaptive wellness questions</div>
+              </div>
+              <span class="nw-action-item__arrow">→</span>
+            </a>
+
+            <a href="dashboard.html" class="nw-action-item">
+              <div class="nw-action-item__icon nw-action-item__icon--blue"></div>
+              <div class="nw-action-item__text">
+                <div class="nw-action-item__label">Dashboard</div>
+                <div class="nw-action-item__desc">Track your scores & trends</div>
+              </div>
+              <span class="nw-action-item__arrow">→</span>
+            </a>
+
+            <a href="recommendations.html" class="nw-action-item">
+              <div class="nw-action-item__icon nw-action-item__icon--green"></div>
+              <div class="nw-action-item__text">
+                <div class="nw-action-item__label">AI Recommendations</div>
+                <div class="nw-action-item__desc">Personalized wellness roadmap</div>
+              </div>
+              <span class="nw-action-item__arrow">→</span>
+            </a>
+
+            <a href="login.html" class="nw-action-item">
+              <div class="nw-action-item__icon nw-action-item__icon--amber"></div>
+              <div class="nw-action-item__text">
+                <div class="nw-action-item__label">Sign In</div>
+                <div class="nw-action-item__desc">Access your saved progress</div>
+              </div>
+              <span class="nw-action-item__arrow">→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES SECTION ===== -->
+  <section class="nw-features">
+    <div class="nw-features__header">
+      <h2>Why Choose <span class="text-accent">NeuroWell</span>?</h2>
+      <p>Our AI engine analyzes your wellness holistically across physical, mental, and emotional dimensions.</p>
+    </div>
+    <div class="nw-features__grid">
+      <div class="nw-feature-card" data-animate>
+        <div class="nw-feature-card__icon" style="background: rgba(139, 92, 246, 0.12);"></div>
+        <h3>Smart Assessment</h3>
+        <p>Complete a structured wellness assessment that adapts to your responses and reveals precise score insights
+          across multiple categories.</p>
+      </div>
+      <div class="nw-feature-card" data-animate>
+        <div class="nw-feature-card__icon" style="background: rgba(59, 130, 246, 0.12);"></div>
+        <h3>Progress Tracking</h3>
+        <p>Monitor score trends, track improvements over time, and measure the impact of healthy lifestyle changes with
+          visual analytics.</p>
+      </div>
+      <div class="nw-feature-card" data-animate>
+        <div class="nw-feature-card__icon" style="background: rgba(16, 185, 129, 0.12);"></div>
+        <h3>AI Recommendations</h3>
+        <p>Receive personalized guidance and action plans powered by NeuroWell's predictive wellness engine with 30-day
+          forecasting.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA BANNER ===== -->
+  <section class="nw-cta">
+    <div class="nw-cta__inner">
+      <h2>Ready to Transform Your Wellness?</h2>
+      <p>Start your free assessment today and discover AI-driven insights about your health.</p>
+      <a href="assessment.html" class="btn btn-lg" style="background: white; color: #6d28d9; font-weight: 700;">
+        Get Started Free →
+      </a>
+    </div>
+  </section>
+
+  <div id="footer-container"></div>
+  <div id="loader-container"></div>
+
+  <script src="data/constants.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>

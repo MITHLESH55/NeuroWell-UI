@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - NeuroWell Wellness Intelligence Platform</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body {
+      background: radial-gradient(circle at top, rgba(102, 126, 234, 0.18), transparent 35%),
+                  linear-gradient(180deg, #0f172a 0%, #020617 100%);
+      min-height: 100vh;
+    }
+    .contact-hero {
+      padding: 5rem 1.5rem 2rem;
+      max-width: 1140px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .contact-hero h1 {
+      font-size: clamp(2.8rem, 4vw, 4.8rem);
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+      color: #f8fafc;
+      margin-bottom: 1.5rem;
+    }
+    .contact-hero p {
+      max-width: 760px;
+      margin: 0 auto 3rem;
+      color: rgba(226, 232, 240, 0.88);
+      font-size: 1.05rem;
+      line-height: 1.9;
+    }
+    .contact-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .contact-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+    }
+    .contact-form {
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      border-radius: 24px;
+      padding: 2.5rem;
+      box-shadow: 0 24px 80px rgba(15, 23, 42, 0.35);
+    }
+    .contact-form h2 {
+      color: #e2e8f0;
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .form-group label {
+      display: block;
+      color: rgba(226, 232, 240, 0.88);
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(51, 65, 85, 0.5);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: border-color 0.25s ease;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: rgba(99, 102, 241, 0.5);
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: rgba(226, 232, 240, 0.5);
+    }
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .info-card {
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      border-radius: 24px;
+      padding: 2rem;
+      box-shadow: 0 24px 80px rgba(15, 23, 42, 0.35);
+    }
+    .info-card h3 {
+      color: #e2e8f0;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.2rem;
+    }
+    .info-card p {
+      color: rgba(226, 232, 240, 0.78);
+      margin: 0;
+      line-height: 1.8;
+    }
+    .success-message {
+      display: none;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      color: #86efac;
+      margin-bottom: 1.5rem;
+      border-radius: 8px;
+    }
+    .error-message {
+      display: none;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      color: #fca5a5;
+      margin-bottom: 1.5rem;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.25s ease;
+    }
+    .submit-btn:hover {
+      transform: translateY(-2px);
+    }
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body data-page="contact">
+  <div id="navbar-container"></div>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="contact-hero">
+      <h1>Get In Touch</h1>
+      <p>
+        Have questions about NeuroWell? We'd love to hear from you. Send us a message
+        and we'll respond as soon as possible.
+      </p>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-container">
+      <!-- Contact Form -->
+      <div class="contact-form">
+        <h2>Send us a Message</h2>
+        <div id="successMessage" class="success-message">
+          ✓ Thank you! Your message has been sent successfully.
+        </div>
+        <div id="errorMessage" class="error-message">
+          ✕ Please fill in all fields correctly.
+        </div>
+        <form id="contactForm">
+          <div class="form-group">
+            <label for="name">Full Name *</label>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              placeholder="Your name"
+              required
+              minlength="2"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address *</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              placeholder="your@email.com"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="subject">Subject *</label>
+            <input 
+              type="text" 
+              id="subject" 
+              name="subject" 
+              placeholder="What is this about?"
+              required
+              minlength="3"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="message">Message *</label>
+            <textarea 
+              id="message" 
+              name="message" 
+              placeholder="Tell us more about your inquiry..."
+              required
+              minlength="10"
+            ></textarea>
+          </div>
+
+          <button type="submit" class="submit-btn">Send Message</button>
+        </form>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="contact-info">
+        <div class="info-card" data-animate>
+          <h3>📧 Email</h3>
+          <p>
+            For general inquiries: <strong>hello@neurowell.io</strong><br>
+            Support: <strong>support@neurowell.io</strong><br>
+            Partnership: <strong>partnerships@neurowell.io</strong>
+          </p>
+        </div>
+
+        <div class="info-card" data-animate>
+          <h3>🌐 Follow Us</h3>
+          <p>
+            Stay updated with wellness tips and platform updates on our social channels:<br>
+            <strong>Twitter</strong> | <strong>LinkedIn</strong> | <strong>Instagram</strong>
+          </p>
+        </div>
+
+        <div class="info-card" data-animate>
+          <h3>⏰ Response Time</h3>
+          <p>
+            We typically respond to inquiries within 24 hours during business days.
+            For urgent matters, please mark your email as "URGENT".
+          </p>
+        </div>
+
+        <div class="info-card" data-animate>
+          <h3>💡 Quick Links</h3>
+          <p>
+            <a href="about.html" style="color: var(--primary-light); text-decoration: none;">Learn about NeuroWell</a> •
+            <a href="services.html" style="color: var(--primary-light); text-decoration: none;">View services</a> •
+            <a href="privacy.html" style="color: var(--primary-light); text-decoration: none;">Privacy policy</a>
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer-container"></div>
+  <div id="loader-container"></div>
+
+  <script src="data/constants.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Form validation and submission
+    document.getElementById('contactForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const subject = document.getElementById('subject').value.trim();
+      const message = document.getElementById('message').value.trim();
+
+      // Validation
+      if (!name || !email || !subject || !message) {
+        showError('Please fill in all required fields.');
+        return;
+      }
+
+      // Email validation regex
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showError('Please enter a valid email address.');
+        return;
+      }
+
+      if (name.length < 2) {
+        showError('Name must be at least 2 characters.');
+        return;
+      }
+
+      if (subject.length < 3) {
+        showError('Subject must be at least 3 characters.');
+        return;
+      }
+
+      if (message.length < 10) {
+        showError('Message must be at least 10 characters.');
+        return;
+      }
+
+      // Show success message
+      showSuccess();
+
+      // Reset form
+      document.getElementById('contactForm').reset();
+
+      // Log to console (in production, this would send to a backend)
+      console.log('Contact form submitted:', { name, email, subject, message });
+    });
+
+    function showError(errorMsg) {
+      const errorElement = document.getElementById('errorMessage');
+      const successElement = document.getElementById('successMessage');
+      
+      successElement.style.display = 'none';
+      errorElement.textContent = '✕ ' + errorMsg;
+      errorElement.style.display = 'block';
+
+      setTimeout(() => {
+        errorElement.style.display = 'none';
+      }, 5000);
+    }
+
+    function showSuccess() {
+      const successElement = document.getElementById('successMessage');
+      const errorElement = document.getElementById('errorMessage');
+      
+      errorElement.style.display = 'none';
+      successElement.style.display = 'block';
+
+      setTimeout(() => {
+        successElement.style.display = 'none';
+      }, 5000);
+    }
+  </script>
+</body>
+</html>

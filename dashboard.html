@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wellness Dashboard - NeuroWell</title>
+  <meta name="description" content="Track your wellness scores, trends, burnout risk, and AI-powered insights on your personalized NeuroWell dashboard.">
+
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body {
+      background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+      min-height: 100vh;
+    }
+
+    /* Page hero banner */
+    .page-hero {
+      position: relative;
+      padding: 3rem 1.5rem 1.5rem;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+      border-radius: 50%;
+      z-index: 0;
+    }
+
+    .page-hero__content {
+      position: relative;
+      z-index: 1;
+      animation: fadeInUp 0.7s ease-out both;
+    }
+
+    .page-hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      color: var(--primary-light);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .page-hero h1 {
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: white;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-hero p {
+      color: var(--text-tertiary);
+      font-size: 1rem;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* Dashboard layout */
+    .dashboard-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem 4rem;
+    }
+
+    /* Overall Score Section - special treatment */
+    .score-hero {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 24px;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      animation: fadeInUp 0.7s ease-out 0.1s both;
+    }
+
+    .score-hero .card-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .score-hero .card-header h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    .score-layout {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .score-canvas-wrap {
+      position: relative;
+      width: 200px;
+      height: 200px;
+    }
+
+    .score-insights {
+      flex: 1;
+      min-width: 250px;
+      color: rgba(226, 232, 240, 0.88);
+      line-height: 1.8;
+    }
+
+    /* Analytics grid */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Projection cards */
+    .projection-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .projection-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .projection-card:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(139, 92, 246, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .projection-value {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .projection-label {
+      margin-top: 0.75rem;
+      color: var(--text-tertiary);
+      font-size: 0.85rem;
+    }
+
+    /* Trend chart */
+    .chart-wrap {
+      height: 350px;
+    }
+
+    /* Section headings */
+    .section-heading {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Next Steps */
+    .next-steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .next-steps-grid .btn {
+      justify-content: center;
+    }
+
+    /* Dashboard inline styles */
+    .circular-progress-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto;
+    }
+    .circular-progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+    }
+    .circular-progress-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .circular-progress-label {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 0.5rem;
+    }
+    .score-insight-item {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    .score-insight-item:last-child {
+      border-bottom: none;
+    }
+    .insight-label {
+      font-size: 0.9rem;
+      color: rgba(226, 232, 240, 0.78);
+    }
+    .insight-value {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .analytics-grid {
+        grid-template-columns: 1fr;
+      }
+      .projection-grid {
+        grid-template-columns: 1fr;
+      }
+      .next-steps-grid {
+        grid-template-columns: 1fr;
+      }
+      .score-layout {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body data-page="dashboard">
+  <!-- Navigation Bar -->
+  <div id="navbar-container"></div>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Page Hero -->
+    <div class="page-hero">
+      <div class="page-hero__content">
+        <span class="page-hero__badge">📊 Analytics</span>
+        <h1>Your Wellness <span class="text-accent">Dashboard</span></h1>
+        <p>Track your wellness scores, trends, and burnout risk</p>
+      </div>
+    </div>
+
+    <div class="dashboard-wrapper">
+      <!-- Dashboard Container -->
+      <div id="dashboardContainer">
+        <!-- Overall Score -->
+        <section class="score-hero" data-animate>
+          <div class="card-header">
+            <h3>🎯 Overall Wellness Score</h3>
+          </div>
+          <div class="score-layout">
+            <div class="score-canvas-wrap">
+              <canvas id="circularProgressCanvas" style="width: 100%; height: 100%; filter: drop-shadow(0 10px 30px rgba(15,23,42,0.5));"></canvas>
+            </div>
+            <div class="score-insights" id="scoreInsights">
+              <p>Loading insights...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Overview Cards -->
+        <section id="overviewCards" class="mb-lg"></section>
+
+        <!-- Analytics Grid: Category Comparison & Burnout Gauge -->
+        <section class="mb-lg">
+          <div class="analytics-grid">
+            <!-- Category Comparison Chart -->
+            <div class="card" data-animate>
+              <div class="card-header">
+                <h3>📊 Category Comparison</h3>
+              </div>
+              <div class="card-body">
+                <div style="height: 300px;">
+                  <canvas id="categoryChartCanvas" style="height: 100%;"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Burnout Risk Speedometer -->
+            <div class="card" data-animate>
+              <div class="card-header">
+                <h3>⚡ Burnout Risk Gauge</h3>
+              </div>
+              <div class="card-body">
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem;">
+                  <div style="position: relative; width: 180px; height: 90px;">
+                    <canvas id="burnoutGaugeCanvas" style="width: 100%; height: 100%;"></canvas>
+                  </div>
+                  <div id="burnoutStatus" style="text-align: center; color: rgba(226, 232, 240, 0.88);">
+                    <p>Analyzing...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Wellness Projection -->
+        <section class="mb-lg">
+          <div class="card" data-animate>
+            <div class="card-header">
+              <h3>📈 Wellness Projection</h3>
+            </div>
+            <div class="card-body">
+              <div class="projection-grid">
+                <div class="projection-card">
+                  <div class="projection-value" style="color: var(--primary-light);" id="day7">-</div>
+                  <div class="projection-label">7-Day Forecast</div>
+                </div>
+                <div class="projection-card">
+                  <div class="projection-value" style="color: var(--info);" id="day14">-</div>
+                  <div class="projection-label">14-Day Forecast</div>
+                </div>
+                <div class="projection-card">
+                  <div class="projection-value" style="color: var(--success);" id="day30">-</div>
+                  <div class="projection-label">30-Day Forecast</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Assessment Trend Analysis: Last 5 Attempts -->
+        <section class="mb-lg" id="trendAnalysisSection"></section>
+
+        <!-- Goals Tracking Section -->
+        <section class="mb-lg" id="goalsSection"></section>
+
+        <!-- Trend Chart Section -->
+        <section class="mb-lg">
+          <div class="card" data-animate>
+            <div class="card-header">
+              <h3>📈 30-Day Wellness Trend</h3>
+              <p style="margin-top: 0.5rem; color: rgba(226, 232, 240, 0.78); font-size: 0.9rem;">Historical data + AI predictions</p>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrap">
+                <canvas id="trendChartCanvas" style="height: 100%;"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Metrics Section -->
+        <section class="mb-lg">
+          <h2 class="section-heading">Detailed Metrics</h2>
+          <div id="metricsContainer"></div>
+        </section>
+
+        <!-- Recommendations Section -->
+        <section class="mb-lg">
+          <h2 class="section-heading">Top Recommendations</h2>
+          <div id="recommendationsContainer"></div>
+          <div style="text-align: center; margin-top: 1.5rem;">
+            <a href="recommendations.html" class="btn btn-secondary">
+              View All Recommendations →
+            </a>
+          </div>
+        </section>
+
+        <!-- Action Section -->
+        <section class="card mb-lg" data-animate>
+          <div class="card-header">
+            <h3>🚀 Next Steps</h3>
+          </div>
+          <div class="card-body">
+            <div class="next-steps-grid">
+              <a href="recommendations.html" class="btn btn-primary">
+                💡 Get Recommendations
+              </a>
+              <a href="assessment.html" class="btn btn-secondary">
+                🔄 Retake Assessment
+              </a>
+              <button class="btn btn-secondary" id="exportBtn">
+                📥 Export Data
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer-container"></div>
+
+  <!-- Loader Component -->
+  <div id="loader-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script src="data/constants.js"></script>
+  <script src="data/questions.js"></script>
+  <script src="data/rules.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/prediction.js"></script>
+  <script src="js/recommendations.js"></script>
+  <script src="js/goals.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

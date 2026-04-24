@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goal Tracking Test Suite - NeuroWell</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .test-container {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .test-section {
+      background: var(--bg-secondary);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border-radius: 0.5rem;
+      border-left: 4px solid #667eea;
+    }
+    .test-controls {
+      display: grid;
+      gap: 0.75rem;
+    }
+    .test-button {
+      padding: 0.75rem 1.5rem;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-align: left;
+    }
+    .test-button:hover {
+      background: #764ba2;
+      transform: translateY(-2px);
+    }
+    .test-button.secondary {
+      background: #3b82f6;
+    }
+    .test-button.secondary:hover {
+      background: #2563eb;
+    }
+    .test-button.success {
+      background: #10b981;
+    }
+    .test-button.success:hover {
+      background: #059669;
+    }
+    .test-output {
+      background: var(--bg-tertiary);
+      padding: 1rem;
+      border-radius: 0.375rem;
+      margin-top: 1rem;
+      font-family: monospace;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #cbd5e1;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+    .info { color: #3b82f6; }
+    .warning { color: #f59e0b; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+  </style>
+</head>
+<body data-page="test">
+  <div class="test-container">
+    <h1>🧪 NeuroWell Goal Tracking Test Suite</h1>
+    <p>Test and validate the goal tracking system with various scenarios</p>
+
+    <!-- Test Controls -->
+    <div class="test-section">
+      <h2>🎯 Test Controls</h2>
+      <div class="test-controls">
+        <button class="test-button" onclick="clearGoals()">🗑️ Clear All Goals</button>
+        <button class="test-button secondary" onclick="initializeGoals()">🆕 Initialize Default Goals</button>
+        <button class="test-button secondary" onclick="viewGoalStatus()">👁️ View Goal Status</button>
+        <button class="test-button success" onclick="simulateLowProgress()">📊 Simulate Low Progress (20-30%)</button>
+        <button class="test-button success" onclick="simulateMediumProgress()">📈 Simulate Medium Progress (50-60%)</button>
+        <button class="test-button success" onclick="simulateHighProgress()">🚀 Simulate High Progress (85-95%)</button>
+        <button class="test-button success" onclick="simulateCompletedGoals()">✅ Simulate Completed Goals</button>
+        <button class="test-button" onclick="calculateRecommendations()">💡 Calculate Recommendations</button>
+        <button class="test-button" onclick="launchDashboard()">📊 Launch Dashboard with Goals</button>
+      </div>
+    </div>
+
+    <!-- Output Area -->
+    <div class="test-section">
+      <h2>Test Output</h2>
+      <div id="testOutput" class="test-output">Ready for testing...</div>
+    </div>
+
+    <!-- Goal Definitions Reference -->
+    <div class="test-section">
+      <h2>📋 Goal Definitions</h2>
+      <div class="grid-2">
+        <div>
+          <h3>😴 Improve Sleep</h3>
+          <p><strong>Category:</strong> Physical</p>
+          <p><strong>Target:</strong> 75</p>
+          <p><strong>Baseline:</strong> 60</p>
+          <p><strong>Progress Range:</strong> 0-100%</p>
+        </div>
+        <div>
+          <h3>🧘 Reduce Stress</h3>
+          <p><strong>Category:</strong> Mental</p>
+          <p><strong>Target:</strong> 80</p>
+          <p><strong>Baseline:</strong> 50</p>
+          <p><strong>Progress Range:</strong> 0-100%</p>
+        </div>
+        <div>
+          <h3>🏃 Increase Activity</h3>
+          <p><strong>Category:</strong> Physical</p>
+          <p><strong>Target:</strong> 85</p>
+          <p><strong>Baseline:</strong> 55</p>
+          <p><strong>Progress Range:</strong> 0-100%</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test Guide -->
+    <div class="test-section">
+      <h2>📖 Test Guide</h2>
+      <ol>
+        <li>Click "Initialize Default Goals" to create the three main goals</li>
+        <li>Click "View Goal Status" to see current goal state</li>
+        <li>Choose a progress simulation level</li>
+        <li>Click "View Goal Status" again to see updated progress</li>
+        <li>Use "Calculate Recommendations" to get goal advice</li>
+        <li>Click "Launch Dashboard" to see goal visualization</li>
+        <li>Verify progress bars update correctly based on scores</li>
+      </ol>
+    </div>
+  </div>
+
+  <script src="frontend/data/constants.js"></script>
+  <script src="frontend/data/questions.js"></script>
+  <script src="frontend/data/rules.js"></script>
+  <script src="frontend/js/storage.js"></script>
+  <script src="frontend/js/scoring.js"></script>
+  <script src="frontend/js/goals.js"></script>
+
+  <script>
+    const output = document.getElementById('testOutput');
+
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const prefix = {
+        'success': '✅',
+        'error': '❌',
+        'info': 'ℹ️',
+        'warning': '⚠️'
+      }[type] || '•';
+      
+      const line = `[${timestamp}] ${prefix} ${message}`;
+      output.innerHTML += `<div class="${type}">${escapeHtml(line)}</div>`;
+      output.scrollTop = output.scrollHeight;
+      console.log(line);
+    }
+
+    function escapeHtml(text) {
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    function clearGoals() {
+      log('Clearing all goals...', 'warning');
+      try {
+        localStorage.removeItem(CONSTANTS.STORAGE.GOALS);
+        log('✓ All goals cleared', 'success');
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    function initializeGoals() {
+      log('Initializing default goals...', 'info');
+      try {
+        const goals = GoalManager.initializeGoals();
+        log(`✓ Created ${goals.length} default goals`, 'success');
+        goals.forEach(goal => {
+          log(`  • ${goal.icon} ${goal.name} (${goal.category})`, 'info');
+        });
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    function viewGoalStatus() {
+      log('Retrieving goal status...', 'info');
+      try {
+        const goals = GoalManager.getGoals();
+        if (goals.length === 0) {
+          log('No goals found. Initialize first.', 'warning');
+          return;
+        }
+
+        log(`Found ${goals.length} goals:`, 'info');
+        
+        goals.forEach(goal => {
+          const status = GoalManager.getGoalStatus(goal);
+          log(`\n${goal.icon} ${goal.name}`, 'info');
+          log(`   Status: ${status.label}`, 'info');
+          log(`   Progress: ${goal.progress}%`, 'info');
+          log(`   Current Score: ${goal.currentScore || 'N/A'}`, 'info');
+          log(`   Target Score: ${goal.targetScore}`, 'info');
+          log(`   Active: ${goal.isActive}`, 'info');
+        });
+
+        // Overall progress
+        const overall = GoalManager.getOverallProgress();
+        const completed = GoalManager.getCompletedCount();
+        const total = GoalManager.getTotalCount();
+        
+        log(`\n📊 Overall Summary:`, 'success');
+        log(`   Overall Progress: ${overall}%`, 'success');
+        log(`   Completed: ${completed}/${total}`, 'success');
+
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    function generateScores(basePhysical, baseMental, baseEmotional) {
+      const variation = (val) => Math.max(0, Math.min(100, val + (Math.random() - 0.5) * 10));
+      return {
+        overall: Math.round((basePhysical * 0.35 + baseMental * 0.35 + baseEmotional * 0.30)),
+        physical: Math.round(variation(basePhysical)),
+        mental: Math.round(variation(baseMental)),
+        emotional: Math.round(variation(baseEmotional))
+      };
+    }
+
+    function simulateLowProgress() {
+      log('Simulating low progress scenario...', 'info');
+      try {
+        const scores = generateScores(35, 40, 38);
+        log(`Generated scores: P=${scores.physical}%, M=${scores.mental}%, E=${scores.emotional}%`, 'info');
+
+        // Save to history for goal calculation
+        StorageManager.saveHistoricalData(scores);
+        
+        // Calculate goal progress
+        const goals = GoalManager.calculateGoalProgress(scores);
+        log('✓ Goals updated with low progress', 'success');
+        
+        goals.forEach(goal => {
+          log(`  ${goal.icon} ${goal.name}: ${goal.progress}%`, 'warning');
+        });
+
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    function simulateMediumProgress() {
+      log('Simulating medium progress scenario...', 'info');
+      try {
+        const scores = generateScores(65, 70, 68);
+        log(`Generated scores: P=${scores.physical}%, M=${scores.mental}%, E=${scores.emotional}%`, 'info');
+
+        StorageManager.saveHistoricalData(scores);
+        const goals = GoalManager.calculateGoalProgress(scores);
+        log('✓ Goals updated with medium progress', 'success');
+        
+        goals.forEach(goal => {
+          log(`  ${goal.icon} ${goal.name}: ${goal.progress}%`, 'info');
+        });
+
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    function simulateHighProgress() {
+      log('Simulating high progress scenario...', 'info');
+      try {
+        const scores = generateScores(82, 85, 80);
+        log(`Generated scores: P=${scores.physical}%, M=${scores.mental}%, E=${scores.emotional}%`, 'info');
+
+        StorageManager.saveHistoricalData(scores);
+        const goals = GoalManager.calculateGoalProgress(scores);
+        log('✓ Goals updated with high progress', 'success');
+        
+        goals.forEach(goal => {
+          log(`  ${goal.icon} ${goal.name}: ${goal.progress}%`, 'success');
+        });
+
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    function simulateCompletedGoals() {
+      log('Simulating completed goals scenario...', 'info');
+      try {
+        const scores = generateScores(95, 95, 92);
+        log(`Generated scores: P=${scores.physical}%, M=${scores.mental}%, E=${scores.emotional}%`, 'info');
+
+        StorageManager.saveHistoricalData(scores);
+        const goals = GoalManager.calculateGoalProgress(scores);
+        log('✓ Goals updated - checking for completions', 'success');
+        
+        const completed = goals.filter(g => g.status === 'completed');
+        if (completed.length > 0) {
+          log(`🎉 ${completed.length} goal(s) completed!`, 'success');
+          completed.forEach(goal => {
+            log(`  ✓ ${goal.icon} ${goal.name}: 100%`, 'success');
+          });
+        } else {
+          log('No goals completed yet', 'info');
+        }
+
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    function calculateRecommendations() {
+      log('Calculating goal recommendations...', 'info');
+      try {
+        const goals = GoalManager.getGoals();
+        if (goals.length === 0) {
+          log('Initialize goals first', 'warning');
+          return;
+        }
+
+        // Get latest scores from history
+        const history = StorageManager.getHistoricalData();
+        if (history.length === 0) {
+          log('No score history. Run a progress simulation first.', 'warning');
+          return;
+        }
+
+        const latestScores = history[history.length - 1].scores;
+        const recommendations = GoalManager.getGoalRecommendations(latestScores);
+
+        if (recommendations.length === 0) {
+          log('✓ All goals are on track!', 'success');
+          return;
+        }
+
+        log(`Found ${recommendations.length} recommendations:`, 'info');
+        recommendations.forEach((rec, idx) => {
+          const priorityIcon = rec.priority === 'high' ? '🔴' : rec.priority === 'medium' ? '🟡' : '🟢';
+          log(`\n${idx + 1}. ${priorityIcon} ${rec.goalName}`, 'info');
+          log(`   Gap: ${rec.gap} points (Current: ${rec.currentScore} → Target: ${rec.targetScore})`, 'warning');
+          log(`   Priority: ${rec.priority.toUpperCase()}`, 'info');
+        });
+
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    function launchDashboard() {
+      log('Launching dashboard...', 'info');
+      try {
+        const goals = GoalManager.getGoals();
+        if (goals.length === 0) {
+          log('Initialize goals and add score data first', 'warning');
+          return;
+        }
+        log('Opening dashboard.html', 'success');
+        window.location.href = 'frontend/dashboard.html';
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    // Initial status
+    log('Goal Tracking Test Suite loaded', 'success');
+    const existingGoals = GoalManager.getGoals();
+    log(`Current goals in storage: ${existingGoals.length}`, 'info');
+  </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wellness Assessment - NeuroWell</title>
+  <meta name="description" content="Take your personalized AI-driven wellness assessment. 15 adaptive questions across physical, mental, and emotional dimensions.">
+
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body {
+      background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+      min-height: 100vh;
+    }
+
+    /* Page hero banner */
+    .page-hero {
+      position: relative;
+      padding: 3rem 1.5rem 2rem;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+      z-index: 0;
+    }
+
+    .page-hero__content {
+      position: relative;
+      z-index: 1;
+      animation: fadeInUp 0.7s ease-out both;
+    }
+
+    .page-hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      color: var(--primary-light);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .page-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: white;
+      margin-bottom: 0.6rem;
+    }
+
+    .page-hero p {
+      color: var(--text-tertiary);
+      font-size: 1.05rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* Enhanced assessment container */
+    .assessment-wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+      animation: fadeInUp 0.7s ease-out 0.15s both;
+    }
+
+    /* Enhanced progress bar */
+    .progress {
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--primary-gradient);
+      transition: width 0.5s ease;
+    }
+
+    /* Tip card */
+    .tip-card {
+      background: rgba(139, 92, 246, 0.08);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: 16px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body data-page="assessment">
+  <!-- Navigation Bar -->
+  <div id="navbar-container"></div>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Page Hero -->
+    <div class="page-hero">
+      <div class="page-hero__content">
+        <span class="page-hero__badge">🧠 AI Assessment</span>
+        <h1>Wellness <span class="text-accent">Assessment</span></h1>
+        <p>Answer 15 questions about your physical, mental, and emotional wellness</p>
+      </div>
+    </div>
+
+    <!-- Assessment Wrapper -->
+    <div class="assessment-wrapper">
+      <!-- ✅ FIX APPLIED HERE -->
+      <form id="assessmentForm">
+        <div id="assessmentContainer" class="assessment-container">
+          <!-- Step Indicator -->
+          <div id="stepIndicator"></div>
+
+          <!-- Progress Bar -->
+          <div class="progress mb-lg">
+            <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+          </div>
+
+          <!-- Questions Container -->
+          <div id="questionsContainer"></div>
+
+          <!-- Navigation Buttons -->
+          <div id="navigationContainer"></div>
+
+          <!-- Assessment Tips -->
+          <div class="tip-card">
+            <span style="font-size: 1.25rem;">💡</span>
+            <span><strong>Tip:</strong> Answer honestly for accurate wellness insights. This should take about 5-10 minutes.</span>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer-container"></div>
+
+  <!-- Loader Component -->
+  <div id="loader-container"></div>
+
+  <!-- Scripts -->
+  <script src="data/constants.js"></script>
+  <script src="data/questions.js"></script>
+  <script src="data/rules.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/prediction.js"></script>
+  <script src="js/recommendations.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/assessment.js"></script>
+
+  <script>
+    // Update progress bar
+    const updateProgress = () => {
+      const currentStep = document.body.dataset.currentStep || 1;
+      const totalSteps = 5;
+      const percentage = (currentStep / totalSteps) * 100;
+      const progressBar = document.getElementById('progressBar');
+      if (progressBar) {
+        progressBar.style.width = percentage + '%';
+      }
+    };
+
+    // Update progress on step change
+    const observer = new MutationObserver(updateProgress);
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-current-step'] });
+    updateProgress();
+  </script>
+</body>
+</html>

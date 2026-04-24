@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Hub - NeuroWell</title>
+    <link rel="stylesheet" href="frontend/css/main.css">
+    <link rel="stylesheet" href="frontend/css/components.css">
+    <link rel="stylesheet" href="frontend/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="frontend/assets/logos/neurowell-logo.png" alt="NeuroWell" class="nav-logo">
+                <span class="nav-title">NeuroWell</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="assessment.html" class="nav-link">Assessment</a>
+                <a href="blog.html" class="nav-link active">Knowledge Hub</a>
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="recommendations.html" class="nav-link">Recommendations</a>
+                <div class="nav-auth">
+                    <button id="loginBtn" class="btn btn-outline">Login</button>
+                    <button id="registerBtn" class="btn btn-primary">Sign Up</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">Knowledge Hub</h1>
+                <p class="hero-subtitle">Expert insights, research-backed tips, and practical guidance for your wellness journey</p>
+                <div class="hero-search">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" placeholder="Search articles..." class="search-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Articles -->
+    <section class="featured-section">
+        <div class="container">
+            <h2 class="section-title">Featured Articles</h2>
+            <div id="featuredArticles" class="articles-grid">
+                <!-- Featured articles will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="categories-section">
+        <div class="container">
+            <h2 class="section-title">Explore by Category</h2>
+            <div id="categoriesGrid" class="categories-grid">
+                <!-- Categories will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- All Articles -->
+    <section class="articles-section">
+        <div class="container">
+            <div class="articles-header">
+                <h2 class="section-title">Latest Articles</h2>
+                <div class="articles-filters">
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="">All Categories</option>
+                    </select>
+                    <select id="sortFilter" class="filter-select">
+                        <option value="publishedAt">Latest First</option>
+                        <option value="-publishedAt">Oldest First</option>
+                        <option value="views">Most Viewed</option>
+                        <option value="-views">Least Viewed</option>
+                    </select>
+                </div>
+            </div>
+            <div id="articlesGrid" class="articles-grid">
+                <!-- Articles will be loaded here -->
+            </div>
+            <div id="loadMoreContainer" class="load-more-container">
+                <button id="loadMoreBtn" class="btn btn-secondary">Load More Articles</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Signup -->
+    <section class="newsletter-section">
+        <div class="container">
+            <div class="newsletter-content">
+                <div class="newsletter-text">
+                    <h3>Stay Updated</h3>
+                    <p>Get the latest wellness insights and research delivered to your inbox</p>
+                </div>
+                <div class="newsletter-form">
+                    <input type="email" placeholder="Enter your email" class="newsletter-input">
+                    <button class="btn btn-primary">Subscribe</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="frontend/assets/logos/neurowell-logo.png" alt="NeuroWell" class="footer-logo">
+                    <p>Your AI-powered wellness companion for predictive health insights and personalized recommendations.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Platform</h4>
+                        <a href="assessment.html">Assessment</a>
+                        <a href="dashboard.html">Dashboard</a>
+                        <a href="recommendations.html">Recommendations</a>
+                        <a href="blog.html">Knowledge Hub</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Resources</h4>
+                        <a href="#">Help Center</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Contact Us</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Company</h4>
+                        <a href="#">About Us</a>
+                        <a href="#">Careers</a>
+                        <a href="#">Press</a>
+                        <a href="#">Blog</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 NeuroWell. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Article Modal -->
+    <div id="articleModal" class="modal">
+        <div class="modal-content article-modal">
+            <div class="modal-header">
+                <button class="modal-close">&times;</button>
+            </div>
+            <div id="articleContent" class="article-content">
+                <!-- Article content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="frontend/js/blog.js"></script>
+    <script src="frontend/js/auth.js"></script>
+    <script src="frontend/js/storage.js"></script>
+</body>
+</html>

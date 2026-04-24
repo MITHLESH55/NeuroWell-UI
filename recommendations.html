@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wellness Recommendations - NeuroWell</title>
+  <meta name="description" content="Your AI-generated personalized wellness roadmap with actionable recommendations, quick wins, and risk analysis.">
+
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body {
+      background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+      min-height: 100vh;
+    }
+
+    /* Page hero */
+    .page-hero {
+      position: relative;
+      padding: 3rem 1.5rem 1.5rem;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+      border-radius: 50%;
+      z-index: 0;
+    }
+
+    .page-hero__content {
+      position: relative;
+      z-index: 1;
+      animation: fadeInUp 0.7s ease-out both;
+    }
+
+    .page-hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: var(--success);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .page-hero h1 {
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: white;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-hero p {
+      color: var(--text-tertiary);
+      font-size: 1rem;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .recs-wrapper {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem 4rem;
+    }
+
+    /* Section headings */
+    .section-heading {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Projection grid */
+    .projection-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .projection-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 1.25rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .projection-card:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(139, 92, 246, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .projection-value {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .projection-label {
+      color: var(--text-tertiary);
+      font-size: 0.825rem;
+      margin-top: 0.5rem;
+    }
+
+    /* CTA banner */
+    .cta-banner {
+      background: var(--primary-gradient);
+      border-radius: 24px;
+      padding: 2.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border: none;
+    }
+
+    .cta-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1), transparent 60%);
+    }
+
+    .cta-banner h3 {
+      color: white;
+      margin-bottom: 0.75rem;
+      font-size: 1.5rem;
+      position: relative;
+    }
+
+    .cta-banner p {
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .cta-banner .btn-row {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    @media (max-width: 768px) {
+      .projection-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body data-page="recommendations">
+  <!-- Navigation Bar -->
+  <div id="navbar-container"></div>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Page Hero -->
+    <div class="page-hero">
+      <div class="page-hero__content">
+        <span class="page-hero__badge">💡 AI Insights</span>
+        <h1>Personalized <span class="text-accent">Recommendations</span></h1>
+        <p>Your AI-generated wellness roadmap</p>
+      </div>
+    </div>
+
+    <div class="recs-wrapper">
+      <!-- Recommendations Container -->
+      <div id="recommendationsContainer">
+        <!-- Summary Section -->
+        <section class="mb-lg">
+          <div id="summarySection"></div>
+        </section>
+
+        <!-- Main Recommendations -->
+        <section class="mb-lg">
+          <h2 class="section-heading">Recommendations by Priority</h2>
+          <div id="recommendationsContent"></div>
+        </section>
+
+        <!-- Quick Wins -->
+        <section class="mb-lg">
+          <div id="quickWinsSection"></div>
+        </section>
+
+        <!-- Wellness Plan -->
+        <section class="mb-lg">
+          <div id="wellnessPlanSection"></div>
+        </section>
+
+        <!-- Resources -->
+        <section class="mb-lg">
+          <div id="resourcesSection"></div>
+        </section>
+
+        <!-- Action Plan -->
+        <section class="mb-lg">
+          <div id="actionPlanSection"></div>
+        </section>
+
+        <!-- Predictions Section -->
+        <section class="mb-lg">
+          <div class="card" data-animate>
+            <div class="card-header">
+              <h3>📈 Wellness Prediction</h3>
+            </div>
+            <div class="card-body">
+              <p style="margin-bottom: 1rem;">
+                Based on your current wellness score and trajectory, here's what we predict for you:
+              </p>
+              <div class="projection-grid">
+                <div class="projection-card">
+                  <div class="projection-value" style="color: var(--primary-light);" id="day7">-</div>
+                  <div class="projection-label">7-Day Projection</div>
+                </div>
+                <div class="projection-card">
+                  <div class="projection-value" style="color: var(--info);" id="day14">-</div>
+                  <div class="projection-label">14-Day Projection</div>
+                </div>
+                <div class="projection-card">
+                  <div class="projection-value" style="color: var(--success);" id="day30">-</div>
+                  <div class="projection-label">30-Day Projection</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Risk Analysis -->
+        <section class="mb-lg">
+          <div class="card" data-animate>
+            <div class="card-header">
+              <h3>⚠️ Risk Analysis</h3>
+            </div>
+            <div class="card-body" id="riskAnalysisContent">
+              <p style="color: var(--text-tertiary);">Loading risk analysis...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-banner">
+          <h3>Start Your Wellness Journey Today</h3>
+          <p>
+            Follow these recommendations consistently for 30 days to see significant improvements
+          </p>
+          <div class="btn-row">
+            <a href="dashboard.html" class="btn btn-secondary">
+              ← Back to Dashboard
+            </a>
+            <a href="assessment.html" class="btn btn-primary" style="background: white; color: #6d28d9;">
+              🔄 Retake Assessment
+            </a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer-container"></div>
+
+  <!-- Loader Component -->
+  <div id="loader-container"></div>
+
+  <!-- Scripts -->
+  <script src="data/constants.js"></script>
+  <script src="data/questions.js"></script>
+  <script src="data/rules.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/prediction.js"></script>
+  <script src="js/recommendations.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    // Fill in prediction data
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // Load assessment data from backend
+        const assessmentData = await APIService.loadLatestAssessment();
+
+        // Generate recommendations with backend data
+        const recommendations = await RecommendationEngine.generateRecommendations(assessmentData);
+
+        if (recommendations.error) {
+          document.getElementById('recommendationsContainer').innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <h3>No Assessment Data</h3>
+              <p>Complete an assessment to see personalized recommendations.</p>
+              <a href="assessment.html" class="btn btn-primary">Start Assessment</a>
+            </div>
+          `;
+          return;
+        }
+
+        const storedScore = StorageManager.getWellnessScore()?.scores?.overall;
+        const score = storedScore ?? assessmentData?.score ?? 50;
+        const prediction = PredictionEngine.generatePrediction(score);
+
+        document.getElementById('day7').textContent = prediction.day7 + '%';
+        document.getElementById('day14').textContent = prediction.day14 + '%';
+        document.getElementById('day30').textContent = prediction.day30 + '%';
+
+        // Risk analysis
+        const riskMetrics = PredictionEngine.calculateAdvancedBurnoutMetrics();
+        if (riskMetrics) {
+          let riskHTML = `
+            <div style="text-align: left;">
+              <div style="margin-bottom: 1rem;">
+                <div style="font-size: 0.875rem; color: var(--text-tertiary);">RISK LEVEL</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: ${
+                  riskMetrics.riskLevel === 'CRITICAL' ? '#ef4444' :
+                  riskMetrics.riskLevel === 'HIGH' ? '#f59e0b' : '#3b82f6'
+                };">
+                  ${riskMetrics.riskLevel}
+                </div>
+              </div>
+
+              ${riskMetrics.riskFactors.length > 0 ? `
+                <div style="margin-bottom: 1rem;">
+                  <strong style="color: var(--danger);">⚠️ Risk Factors:</strong>
+                  <ul style="margin-top: 0.5rem; list-style: none; padding-left: 1rem;">
+                    ${riskMetrics.riskFactors.map(f => 
+                      `<li style="margin-bottom: 0.25rem;">• ${f}</li>`
+                    ).join('')}
+                  </ul>
+                </div>
+              ` : ''}
+
+              ${riskMetrics.protectiveFactors.length > 0 ? `
+                <div style="margin-bottom: 1rem;">
+                  <strong style="color: var(--success);">✅ Protective Factors:</strong>
+                  <ul style="margin-top: 0.5rem; list-style: none; padding-left: 1rem;">
+                    ${riskMetrics.protectiveFactors.map(f => 
+                      `<li style="margin-bottom: 0.25rem;">• ${f}</li>`
+                    ).join('')}
+                  </ul>
+                </div>
+              ` : ''}
+
+              <p style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1rem;">
+                <strong>Recommendation:</strong> ${riskMetrics.recommendation}
+              </p>
+            </div>
+          `;
+          document.getElementById('riskAnalysisContent').innerHTML = riskHTML;
+        }
+      } catch (error) {
+        console.error('Error loading prediction data:', error);
+      }
+    });
+  </script>
+</body>
+</html>

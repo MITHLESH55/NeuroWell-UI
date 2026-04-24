@@ -1,0 +1,231 @@
+<!-- 
+  NEUROWELL - Loading Spinner Component
+  Animated loader shown during data processing
+  Can be toggled by app.js
+-->
+<div class="loader-overlay" id="loaderOverlay" style="display: none;">
+  <div class="loader-container">
+    <!-- Animated Spinner -->
+    <div class="spinner-wrapper">
+      <div class="spinner"></div>
+      <div class="spinner-inner"></div>
+    </div>
+
+    <!-- Loading Message -->
+    <h3 class="loader-title" id="loaderTitle">Analyzing Your Wellness</h3>
+    <p class="loader-message" id="loaderMessage">
+      Processing your assessment responses...
+    </p>
+
+    <!-- Progress Indicator -->
+    <div class="loader-progress">
+      <div class="loader-progress-bar" id="loaderProgressBar"></div>
+    </div>
+
+    <!-- Loading Dots -->
+    <div class="loader-dots">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Loader Styles */
+  .loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .loader-container {
+    text-align: center;
+    animation: slideInUp 0.4s ease-out;
+  }
+
+  .spinner-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto var(--spacing-2xl);
+  }
+
+  .spinner {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 4px solid rgba(102, 126, 234, 0.2);
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  .spinner-inner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    border: 3px solid rgba(118, 75, 162, 0.2);
+    border-right-color: #764ba2;
+    border-radius: 50%;
+    animation: spinReverse 1.5s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes spinReverse {
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+
+  .loader-title {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem;
+  }
+
+  .loader-message {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0 0 1.5rem;
+    max-width: 250px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .loader-progress {
+    width: 200px;
+    height: 4px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 2px;
+    margin: 1.5rem auto;
+    overflow: hidden;
+  }
+
+  .loader-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    width: 0%;
+    animation: progressAnimation 2s ease-in-out infinite;
+  }
+
+  @keyframes progressAnimation {
+    0% {
+      width: 0%;
+    }
+    50% {
+      width: 100%;
+    }
+    100% {
+      width: 100%;
+    }
+  }
+
+  .loader-dots {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+
+  .loader-dots span {
+    width: 8px;
+    height: 8px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    animation: bounce 1.4s infinite;
+  }
+
+  .loader-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .loader-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes bounce {
+    0%, 80%, 100% {
+      opacity: 0.3;
+      transform: scale(0.8);
+    }
+    40% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+</style>
+
+<script>
+  /**
+   * Loader utility functions
+   * Usage: 
+   *   showLoader() - Display loader
+   *   hideLoader() - Hide loader
+   *   updateLoader(title, message) - Update loader text
+   */
+  
+  const LoaderUtil = {
+    /**
+     * Show the loader overlay
+     * @param {string} title - Loader title text
+     * @param {string} message - Loader message text
+     */
+    show: (title = 'Analyzing Your Wellness', message = 'Processing your data...') => {
+      const overlay = document.getElementById('loaderOverlay');
+      const titleEl = document.getElementById('loaderTitle');
+      const messageEl = document.getElementById('loaderMessage');
+      
+      if (overlay) {
+        if (title) titleEl.textContent = title;
+        if (message) messageEl.textContent = message;
+        overlay.style.display = 'flex';
+      }
+    },
+
+    /**
+     * Hide the loader overlay
+     */
+    hide: () => {
+      const overlay = document.getElementById('loaderOverlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
+    },
+
+    /**
+     * Update loader text and message
+     * @param {string} title - New title
+     * @param {string} message - New message
+     */
+    update: (title, message) => {
+      const titleEl = document.getElementById('loaderTitle');
+      const messageEl = document.getElementById('loaderMessage');
+      
+      if (titleEl) titleEl.textContent = title;
+      if (messageEl) messageEl.textContent = message;
+    }
+  };
+
+  // Make LoaderUtil globally available
+  if (typeof window !== 'undefined') {
+    window.LoaderUtil = LoaderUtil;
+  }
+</script>

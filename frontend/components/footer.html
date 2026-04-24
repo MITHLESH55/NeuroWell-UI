@@ -1,0 +1,83 @@
+<!-- 
+  NEUROWELL - Footer Component
+  Reusable footer for all pages
+  Contains links, social media, copyright
+-->
+<footer>
+  <div class="footer-content">
+    <div class="footer-grid">
+      <!-- Brand Section -->
+      <div class="footer-section">
+        <h4>NeuroWell</h4>
+        <p>Your AI-driven predictive wellness intelligence platform.</p>
+        <p style="color: var(--text-tertiary); font-size: var(--text-sm);">
+          Empowering healthier lives through intelligent wellness prediction and personalized recommendations.
+        </p>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="assessment.html">Take Assessment</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="recommendations.html">Recommendations</a></li>
+        </ul>
+      </div>
+
+      <!-- Resources -->
+      <div class="footer-section">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="#privacy">Privacy Policy</a></li>
+          <li><a href="#terms">Terms of Service</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#contact">Contact Us</a></li>
+        </ul>
+      </div>
+
+      <!-- Wellness Tips -->
+      <div class="footer-section">
+        <h4>Wellness Tips</h4>
+        <ul>
+          <li><a href="#sleep">Sleep Better</a></li>
+          <li><a href="#exercise">Exercise Guide</a></li>
+          <li><a href="#stress">Stress Relief</a></li>
+          <li><a href="#nutrition">Nutrition Tips</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+      <div class="copyright">
+        © 2024 NeuroWell. All rights reserved. | Developed with <span style="color: var(--danger);">❤</span> for your wellness
+      </div>
+      
+      <div class="footer-social">
+        <a href="#facebook" title="Follow on Facebook" aria-label="Facebook">f</a>
+        <a href="#twitter" title="Follow on Twitter" aria-label="Twitter">𝕏</a>
+        <a href="#linkedin" title="Follow on LinkedIn" aria-label="LinkedIn">in</a>
+        <a href="#instagram" title="Follow on Instagram" aria-label="Instagram">📷</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Footer interactions can be added here
+  document.addEventListener('DOMContentLoaded', () => {
+    // Add any footer-specific functionality
+    const footerLinks = document.querySelectorAll('footer a');
+    footerLinks.forEach(link => {
+      if (link.getAttribute('href') === '#' || link.getAttribute('href').startsWith('#')) {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          // Show coming soon message or navigate appropriately
+          console.log('Link to:', link.getAttribute('href'));
+        });
+      }
+    });
+  });
+</script>

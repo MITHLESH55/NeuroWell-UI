@@ -1,0 +1,253 @@
+<!-- 
+  NEUROWELL - Navigation Bar Component
+  Reusable navbar for all pages
+  Loaded dynamically by app.js
+-->
+<nav class="navbar" id="mainNavbar">
+  <div class="navbar-container">
+    <div class="navbar-brand">
+      <svg width="34" height="34" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="10" fill="url(#navGrad)"/>
+        <circle cx="16" cy="10" r="3" fill="white"/>
+        <path d="M16 14v6M12 17h8M13 20c0 1.66 2.24 3 4 3s4-1.34 4-3" 
+              stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="navGrad" x1="0" y1="0" x2="32" y2="32">
+            <stop offset="0%" stop-color="#8b5cf6"/>
+            <stop offset="100%" stop-color="#6d28d9"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      NeuroWell
+    </div>
+
+    <ul class="navbar-menu" id="navbarMenu">
+      <li><a href="index.html" class="nav-link" data-page="index">Home</a></li>
+      <li><a href="about.html" class="nav-link" data-page="about">About</a></li>
+      <li><a href="services.html" class="nav-link" data-page="services">Services</a></li>
+      <li><a href="contact.html" class="nav-link" data-page="contact">Contact</a></li>
+      <li><a href="assessment.html" class="nav-link" data-page="assessment">Assessment</a></li>
+      <li><a href="dashboard.html" class="nav-link" data-page="dashboard">Dashboard</a></li>
+      <li><a href="recommendations.html" class="nav-link" data-page="recommendations">Recommendations</a></li>
+    </ul>
+
+    <div class="navbar-actions">
+      <!-- User Menu (Visible when logged in) -->
+      <div id="userMenu" class="user-menu hidden">
+        <div class="user-info">
+          <div class="user-avatar">👤</div>
+          <div class="user-details">
+            <div class="user-name" id="userName">User</div>
+            <div class="user-email" id="userEmail">user@email.com</div>
+          </div>
+        </div>
+        <button class="btn btn-danger btn-sm" id="logoutBtn">
+          Logout
+        </button>
+      </div>
+
+      <!-- Auth Links (Visible when logged out) -->
+      <div id="authLinks" class="auth-links">
+        <a href="login.html" class="btn btn-secondary btn-sm">Login</a>
+        <a href="register.html" class="btn btn-primary btn-sm">Register</a>
+      </div>
+
+      <!-- Reset Button -->
+      <button class="btn btn-secondary btn-sm" id="resetBtn" title="Reset Assessment">
+        <span>↻</span> Reset
+      </button>
+
+      <!-- Mobile Menu Toggle -->
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span>☰</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .user-menu.hidden {
+    display: none;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 14px;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.18);
+    transition: all 0.3s ease;
+  }
+
+  .user-info:hover {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.3);
+  }
+
+  .user-avatar {
+    font-size: 1.35rem;
+  }
+
+  .user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .user-name {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .user-email {
+    color: var(--text-tertiary);
+    font-size: 0.7rem;
+  }
+
+  .auth-links {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .auth-links.hidden {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    .user-info {
+      gap: 0.5rem;
+      padding: 0.4rem;
+    }
+
+    .user-details {
+      display: none;
+    }
+
+    .user-avatar {
+      font-size: 1.2rem;
+    }
+
+    .auth-links {
+      flex-direction: column;
+      gap: 0.375rem;
+    }
+  }
+</style>
+
+<script>
+  // Initialize navbar functionality
+  const initNavbar = () => {
+    const navbar = document.getElementById('mainNavbar');
+    const navToggle = document.getElementById('navToggle');
+    const navbarMenu = document.getElementById('navbarMenu');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const resetBtn = document.getElementById('resetBtn');
+    const userMenu = document.getElementById('userMenu');
+    const authLinks = document.getElementById('authLinks');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userName = document.getElementById('userName');
+    const userEmail = document.getElementById('userEmail');
+
+    // Scroll-based navbar darkening
+    if (navbar) {
+      const handleScroll = () => {
+        if (window.scrollY > 40) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      };
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      handleScroll(); // Run once on load
+    }
+
+    // Update user display based on auth status
+    const updateUserDisplay = () => {
+      const user = AuthManager.getCurrentUser();
+      
+      if (user) {
+        userMenu.classList.remove('hidden');
+        authLinks.classList.add('hidden');
+        userName.textContent = user.fullName || 'User';
+        userEmail.textContent = user.email;
+      } else {
+        userMenu.classList.add('hidden');
+        authLinks.classList.remove('hidden');
+      }
+    };
+
+    // Logout functionality
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        AuthManager.logout();
+        console.log('✅ User logged out');
+        
+        // Redirect to home
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 500);
+      });
+    }
+
+    // Toggle mobile menu
+    if (navToggle) {
+      navToggle.addEventListener('click', () => {
+        navbarMenu.classList.toggle('active');
+      });
+    }
+
+    // Close menu when link is clicked
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        navbarMenu.classList.remove('active');
+        // Set active state
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
+
+    // Set active nav link based on current page
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    navLinks.forEach(link => {
+      if (link.getAttribute('href') === currentPage) {
+        link.classList.add('active');
+      }
+    });
+
+    // Reset button functionality
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to reset your assessment? This will clear all saved data.')) {
+          localStorage.removeItem(CONSTANTS.STORAGE.ASSESSMENT_RESPONSES);
+          localStorage.removeItem(CONSTANTS.STORAGE.WELLNESS_SCORE);
+          localStorage.removeItem(CONSTANTS.STORAGE.LAST_ASSESSMENT_DATE);
+          window.location.href = 'assessment.html';
+        }
+      });
+    }
+
+    // Initialize user display
+    updateUserDisplay();
+
+    // Listen for auth changes (for multi-tab sync)
+    window.addEventListener('storage', () => {
+      updateUserDisplay();
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNavbar);
+  } else {
+    initNavbar();
+  }
+</script>

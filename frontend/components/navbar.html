@@ -1,0 +1,203 @@
+<!-- 
+  NEUROWELL - Navigation Bar Component
+  Reusable navbar for all pages
+  Loaded dynamically by app.js
+-->
+<nav class="navbar">
+  <div class="navbar-container">
+    <div class="navbar-brand">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="8" fill="url(#gradient)"/>
+        <circle cx="16" cy="10" r="3" fill="white"/>
+        <path d="M16 14v6M12 17h8M13 20c0 1.66 2.24 3 4 3s4-1.34 4-3" 
+              stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32">
+            <stop offset="0%" stop-color="#667eea"/>
+            <stop offset="100%" stop-color="#764ba2"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      NeuroWell
+    </div>
+
+    <ul class="navbar-menu" id="navbarMenu">
+      <li><a href="index.html" class="nav-link" data-page="index">Home</a></li>
+      <li><a href="assessment.html" class="nav-link" data-page="assessment">Assessment</a></li>
+      <li><a href="dashboard.html" class="nav-link" data-page="dashboard">Dashboard</a></li>
+      <li><a href="recommendations.html" class="nav-link" data-page="recommendations">Recommendations</a></li>
+    </ul>
+
+    <div class="navbar-actions">
+      <!-- Profile Section (shown when logged in) -->
+      <div class="navbar-profile" id="navbarProfile" style="display: none;">
+        <div class="profile-info">
+          <div class="profile-avatar">👤</div>
+          <div class="profile-text">
+            <div class="profile-name" id="profileName">User</div>
+            <div class="profile-email" id="profileEmail">user@example.com</div>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="logoutBtn">Logout</button>
+      </div>
+
+      <!-- Auth Buttons (shown when not logged in) -->
+      <div class="navbar-auth" id="navbarAuth">
+        <a href="login.html" class="btn btn-secondary btn-sm">Login</a>
+        <a href="register.html" class="btn btn-primary btn-sm">Register</a>
+      </div>
+
+      <button class="btn btn-secondary btn-sm" id="resetBtn" title="Reset Assessment">
+        <span>↻</span> Reset
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span>☰</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Initialize navbar functionality
+  document.addEventListener('DOMContentLoaded', () => {
+    const navToggle = document.getElementById('navToggle');
+    const navbarMenu = document.getElementById('navbarMenu');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const resetBtn = document.getElementById('resetBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const profileSection = document.getElementById('navbarProfile');
+    const authSection = document.getElementById('navbarAuth');
+    const profileName = document.getElementById('profileName');
+    const profileEmail = document.getElementById('profileEmail');
+
+    // Check login status and update profile display
+    function updateProfileDisplay() {
+      const user = StorageManager.getCurrentUser ? StorageManager.getCurrentUser() : null;
+      if (user && user.email) {
+        // User is logged in
+        profileName.textContent = user.name || user.email.split('@')[0];
+        profileEmail.textContent = user.email;
+        profileSection.style.display = 'flex';
+        authSection.style.display = 'none';
+      } else {
+        // User is not logged in
+        profileSection.style.display = 'none';
+        authSection.style.display = 'flex';
+      }
+    }
+
+    // Initial profile display update
+    updateProfileDisplay();
+
+    // Toggle mobile menu
+    if (navToggle) {
+      navToggle.addEventListener('click', () => {
+        navbarMenu.classList.toggle('active');
+      });
+    }
+
+    // Close menu when link is clicked
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        navbarMenu.classList.remove('active');
+        // Set active state
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
+
+    // Set active nav link based on current page
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    navLinks.forEach(link => {
+      if (link.getAttribute('href') === currentPage) {
+        link.classList.add('active');
+      }
+    });
+
+    // Reset button functionality
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to reset your assessment? This will clear all saved data.')) {
+          localStorage.removeItem(CONSTANTS.STORAGE.ASSESSMENT_RESPONSES);
+          localStorage.removeItem(CONSTANTS.STORAGE.WELLNESS_SCORE);
+          localStorage.removeItem(CONSTANTS.STORAGE.LAST_ASSESSMENT_DATE);
+          window.location.href = 'assessment.html';
+        }
+      });
+    }
+
+    // Logout button functionality
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to logout?')) {
+          // Clear user data from storage
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('authToken');
+          // Redirect to login
+          window.location.href = 'login.html';
+        }
+      });
+    }
+
+    // Listen for storage changes to update profile
+    window.addEventListener('storage', updateProfileDisplay);
+  });
+</script>
+
+<style>
+  .navbar-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-right: 1rem;
+  }
+
+  .profile-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .profile-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667EEA, #764BA2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+  }
+
+  .profile-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .profile-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .profile-email {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+  }
+
+  @media (max-width: 768px) {
+    .navbar-profile {
+      margin-right: 0;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .profile-info {
+      margin-bottom: 0.5rem;
+    }
+
+    .profile-email {
+      display: none;
+    }
+  }
+</style>
