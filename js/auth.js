@@ -68,6 +68,8 @@ const AuthManager = {
    * @returns {object} { success, message, user }
    */
   login: (credentials) => {
+    /* 
+    // --- ORIGINAL VALIDATION (Commented out for bypass) ---
     // Validation
     const validation = AuthManager.validateLoginInput(credentials);
     if (!validation.valid) {
@@ -99,6 +101,22 @@ const AuthManager = {
       success: true,
       message: `Welcome back, ${user.fullName}!`,
       user: { email: user.email, fullName: user.fullName }
+    };
+    */
+
+    // --- BYPASS LOGIC ---
+    AuthManager.setSession({
+      id: 'bypass_user_' + Date.now(),
+      email: credentials.email || 'guest@example.com',
+      fullName: 'Demo User',
+      createdAt: new Date().toISOString()
+    });
+
+    console.log('✅ User logged in successfully (Bypass)');
+    return {
+      success: true,
+      message: 'Welcome back!',
+      user: { email: credentials.email || 'guest@example.com', fullName: 'Demo User' }
     };
   },
 
