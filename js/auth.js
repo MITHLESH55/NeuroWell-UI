@@ -18,10 +18,11 @@ const AuthManager = {
     }
 
     // Check if user already exists
-    const existingUser = AuthManager.getUserByEmail(userData.email);
-    if (existingUser) {
-      return { success: false, message: 'Email already registered. Please login or use a different email.' };
-    }
+    // Bypassed: allow multiple registrations with the same email
+    // const existingUser = AuthManager.getUserByEmail(userData.email);
+    // if (existingUser) {
+    //   return { success: false, message: 'Email already registered. Please login or use a different email.' };
+    // }
 
     // Hash password (simple SHA256 simulation - would use backend in production)
     const hashedPassword = AuthManager.hashPassword(userData.password);
