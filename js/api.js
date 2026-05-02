@@ -137,27 +137,27 @@ const APIService = {
     }
   },
 
-  /**
-   * Fallback to localStorage if backend is unavailable
-   * @param {Array} responses - Assessment responses
-   * @returns {object} Local calculation result
-   */
   async fallbackToLocal(responses) {
     console.log('🔄 Backend unavailable, using local calculation');
 
-    // Calculate scores locally
     const scores = ScoringEngine.calculateScores(responses);
+    const statuses = ScoringEngine.getAllScoreStatuses(scores);
+    const burnoutRisk = ScoringEngine.calculateBurnoutRisk(scores);
+    const burnoutStatus = ScoringEngine.getBurnoutRiskStatus(burnoutRisk);
+    const trend = ScoringEngine.calculateStressTrend();
+    const suggestions = ScoringEngine.generateSuggestions(scores);
 
-    // Calculate burnout risk locally
-    const risk = ScoringEngine.calculateBurnoutRisk(scores);
-
-    // Recommendations are now generated on-the-fly in the recommendations page.
     return {
       id: 'local-' + Date.now(),
       score: scores.overall,
       categoryScores: scores,
-      scores: scores, // Ensure compatibility with new recommendation engine
-      risk: risk,
+      scores: scores,
+      statuses: statuses,
+      burnoutRisk: burnoutRisk,
+      burnoutStatus: burnoutStatus,
+      trend: trend,
+      suggestions: suggestions,
+      lastUpdated: new Date().toISOString(),
       isLocalFallback: true
     };
   }

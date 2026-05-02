@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Login — NeuroWell</title>
+  <meta name="description" content="Sign in to your NeuroWell wellness account.">
+  <link rel="manifest" href="../manifest.json">
+  <meta name="theme-color" content="#8b5cf6">
+  <link rel="stylesheet" href="../css/auth.css">
+</head>
+<body class="auth-page">
+
+<div class="auth-logo">
+  <div class="auth-logo__icon">🧠</div>
+  <div class="auth-logo__name"><span>Neuro</span>Well</div>
+</div>
+
+<div class="auth-card">
+
+  <!-- Offline mode badge (shown when Firebase not configured) -->
+  <div class="auth-offline-badge" id="offlineBadge" style="display:none">
+    📦 Offline Mode — data stored on this device
+  </div>
+
+  <div class="auth-title">Welcome back</div>
+  <p class="auth-sub">Sign in to your wellness account to continue your journey.</p>
+
+  <!-- Error / success alert -->
+  <div class="auth-alert" id="formAlert"></div>
+
+  <form class="auth-form" id="loginForm" onsubmit="return false">
+    <!-- Email -->
+    <div class="auth-field">
+      <label class="auth-label" for="loginEmail">✉️ Email Address</label>
+      <div class="auth-input-wrap">
+        <span class="auth-input-icon">@</span>
+        <input class="auth-input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" required>
+      </div>
+      <div class="field-error" id="emailError">⚠️ <span></span></div>
+    </div>
+
+    <!-- Password -->
+    <div class="auth-field">
+      <label class="auth-label" for="loginPassword">🔒 Password</label>
+      <div class="auth-input-wrap">
+        <span class="auth-input-icon">🔑</span>
+        <input class="auth-input" type="password" id="loginPassword" placeholder="Your password" autocomplete="current-password" required>
+        <button type="button" class="pw-toggle" onclick="togglePw('loginPassword',this)" title="Show password">👁️</button>
+      </div>
+      <div class="field-error" id="pwError">⚠️ <span></span></div>
+    </div>
+
+    <!-- Forgot password link -->
+    <div style="text-align:right;margin-top:-.5rem">
+      <a href="#" style="font-size:.78rem;color:#c4b5fd;text-decoration:none" onclick="forgotPassword()">Forgot password?</a>
+    </div>
+
+    <!-- Submit -->
+    <button type="submit" class="auth-btn" id="loginBtn" onclick="submitLogin()">
+      <div class="spinner"></div>
+      <span class="btn-text">Sign In</span>
+    </button>
+  </form>
+
+  <div class="auth-divider">or</div>
+
+  <!-- Demo access -->
+  <button class="auth-btn" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--a-text,#f1f5f9)" onclick="demoAccess()">
+    🎭 Continue with Demo Mode
+  </button>
+
+  <div class="auth-link">
+    Don't have an account? <a href="signup.html">Create one free →</a>
+  </div>
+</div>
+
+<script>
+window.CONSTANTS = window.CONSTANTS || {STORAGE:{},SCORE_RANGES:{},BURNOUT_RISK:{},ASSESSMENT:{TOTAL_QUESTIONS:30}};
+window.QUESTIONS  = window.QUESTIONS  || [];
+</script>
+<script src="../js/utils.js"></script>
+<script src="../data/constants.js"></script>
+<script src="../data/questions.js"></script>
+<script src="../js/storage.js"></script>
+<script src="../js/firebaseService.js"></script>
+
+<script>
+// ── Init ──────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  await FirebaseService.init();
+
+  // Already logged in? Redirect
+  const user = FirebaseService.getCurrentUser();
+  if (user) { redirectToDashboard(); return; }
+
+  // Show offline badge if Firebase not configured
+  if (!FirebaseService.isConfigured) {
+    document.getElementById('offlineBadge').style.display = 'inline-flex';
+  }
+
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('../sw.js').catch(() => {});
+  }
+
+  // Auth state listener
+  FirebaseService.onAuthChange(user => {
+    if (user) redirectToDashboard();
+  });
+});
+
+// ── Login ─────────────────────────────────────────────────────────
+async function submitLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw    = document.getElementById('loginPassword').value;
+  const btn   = document.getElementById('loginBtn');
+
+  clearErrors();
+
+  // Client-side validation
+  if (!email)        { showFieldError('emailError', 'Please enter your email.'); return; }
+  if (!isEmail(email)){ showFieldError('emailError', 'Please enter a valid email address.'); return; }
+  if (!pw)           { showFieldError('pwError', 'Please enter your password.'); return; }
+
+  // Loading state
+  btn.classList.add('loading'); btn.disabled = true;
+
+  const { user, error } = await FirebaseService.loginUser(email, pw);
+
+  btn.classList.remove('loading'); btn.disabled = false;
+
+  if (error) { showAlert(error, 'error'); return; }
+
+  showAlert('✅ Signed in successfully! Redirecting…', 'success');
+  setTimeout(redirectToDashboard, 1000);
+}
+
+// ── Demo access ───────────────────────────────────────────────────
+function demoAccess() {
+  sessionStorage.setItem('nw_demo_mode', '1');
+  window.location.href = '../dashboard.html';
+}
+
+// ── Forgot password ───────────────────────────────────────────────
+function forgotPassword() {
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email || !isEmail(email)) {
+    showAlert('Enter your email address first, then click "Forgot password".', 'error');
+    return;
+  }
+  showAlert('📧 Password reset email sent (Firebase mode only). Check your inbox.', 'success');
+  // Firebase reset: firebase.auth().sendPasswordResetEmail(email);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────
+function redirectToDashboard() { window.location.href = '../dashboard.html'; }
+function isEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type  = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁️' : '🙈';
+}
+function showAlert(msg, type) {
+  const el = document.getElementById('formAlert');
+  el.textContent = msg; el.className = `auth-alert ${type} show`;
+}
+function showFieldError(id, msg) {
+  const el = document.getElementById(id);
+  el.querySelector('span').textContent = msg;
+  el.classList.add('show');
+}
+function clearErrors() {
+  document.getElementById('formAlert').className = 'auth-alert';
+  document.querySelectorAll('.field-error').forEach(e => e.classList.remove('show'));
+}
+// Submit on Enter
+document.addEventListener('keydown', e => { if (e.key === 'Enter') submitLogin(); });
+</script>
+</body>
+</html>

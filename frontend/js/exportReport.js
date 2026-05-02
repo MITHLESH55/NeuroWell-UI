@@ -1,146 +1,108 @@
 /**
  * NEUROWELL - Export & Report Generation Module
- * Generates downloadable wellness reports in JSON and PDF formats
- * 
- * ARCHITECTURE:
- * - ReportManager: Central manager for all report operations
- * - Integrates data from all modules (scores, goals, bookings, etc.)
- * - Generates professional reports with formatting
- * - Supports multiple export formats
+ * Generates comprehensive wellness reports with all system data
+ * Supports JSON export for full data backup and sharing
  * 
  * FEATURES:
- * - Generate comprehensive wellness reports
- * - Export in JSON format
- * - Export in CSV format (for spreadsheet analysis)
- * - Download as formatted files
- * - Report includes all wellness data
- * 
- * VIVA READY:
- * - Data aggregation from multiple modules
- * - Professional report formatting
- * - Dynamic file generation
- * - Multiple export formats
+ * - Complete wellness report with scores, insights, recommendations
+ * - Goal and habit tracking data
+ * - Gamification statistics
+ * - Weekly/monthly trends
+ * - JSON export for backup/sharing
+ * - Downloadable reports
  */
 
 const ReportManager = {
-  
   /**
    * Generate comprehensive wellness report
-   * Aggregates data from all modules into a single report
-   * VIVA: "We collect data from assessment, goals, bookings, and recommendations
-   * to create a comprehensive wellness profile"
+   * Integrates data from all modules
+   * @returns {object} Complete report data
    */
   generateWellnessReport: () => {
-    const wellnessData = StorageManager.getWellnessScore();
-    const history = StorageManager.getHistoricalData();
-    const goals = GoalManager.getGoals();
-    const responses = StorageManager.getAssessmentResponses();
-    const bookings = BookingManager?.bookings || [];
-
-    if (!wellnessData) {
-      return { error: 'No wellness data available. Please complete an assessment first.' };
-    }
-
-    const scores = wellnessData.scores;
-    const assessmentDate = wellnessData.timestamp;
-
-    // Calculate goal progress
-    const goalStats = {
-      total: goals.length,
-      completed: goals.filter(g => g.status === 'completed').length,
-      inProgress: goals.filter(g => g.status === 'in_progress').length,
-      averageProgress: GoalManager.getOverallProgress ? GoalManager.getOverallProgress() : 0
-    };
-
-    // Calculate trend if history exists
-    let trend = 'stable';
-    if (history && history.length >= 2) {
-      const recent = history[history.length - 1].scores.overall;
-      const previous = history[history.length - 2].scores.overall;
-      trend = recent > previous ? 'improving' : recent < previous ? 'declining' : 'stable';
-    }
-
-    // Upcoming bookings
-    const upcomingBookings = bookings?.filter(b => new Date(b.date) >= new Date()) || [];
-
-    // Create report object
-    const report = {
-      metadata: {
-        reportDate: new Date().toISOString(),
-        format: 'Wellness Report',
-        version: '1.0'
-      },
+    try {
+      const assessmentData = Utility.getAssessmentData();
       
-      userProfile: {
-        assessmentDate: assessmentDate,
-        assessmentCompleted: true,
-        totalAssessments: (history?.length || 0) + 1
-      },
+      if (!assessmentData || !assessmentData.scores) {
+        return { error: 'No wellness data. Please complete an assessment.' };
+      }
 
-      wellnessScores: {
-        overall: {
-          score: scores.overall,
-          status: ReportManager.getScoreStatus(scores.overall),
-          description: ReportManager.getScoreDescription(scores.overall)
+      const scores = assessmentData.scores;
+      const timestamp = assessmentData.timestamp || new Date().toISOString();
+
+      // Compile all data
+      const report = {
+        metadata: {
+          generated: new Date().toISOString(),
+          version: '1.0',
+          platform: 'NeuroWell Wellness Intelligence Platform'
         },
-        physical: {
-          score: scores.physical,
-          status: ReportManager.getScoreStatus(scores.physical),
-          description: 'Physical health and exercise capacity'
+        
+        // Core wellness scores
+        wellness: {
+          scores: scores,
+          riskAssessment: RecommendationEngine.assessRisk(scores),
+          focusAreas: RecommendationEngine.identifyFocusAreas(scores),
+          timestamp: timestamp
         },
-        mental: {
-          score: scores.mental,
-          status: ReportManager.getScoreStatus(scores.mental),
-          description: 'Mental clarity and focus'
+
+        // Recommendations
+        recommendations: {
+          suggestions: RecommendationEngine.generateSuggestions(scores),
+          experts: RecommendationEngine.getExpertRecommendations(scores),
+          actionItems: RecommendationEngine.generateActionItems(scores)
         },
-        emotional: {
-          score: scores.emotional,
-          status: ReportManager.getScoreStatus(scores.emotional),
-          description: 'Emotional resilience and well-being'
+
+        // Daily routine
+        routine: RoutineGenerator.generateDailyRoutine(scores),
+
+        // Goals tracking
+        goals: {
+          all: GoalTracker.getGoals(),
+          statistics: GoalTracker.getStatistics(),
+          completed: GoalTracker.getCompletedGoals(),
+          active: GoalTracker.getActiveGoals()
+        },
+
+        // Habits tracking
+        habits: {
+          checkins: HabitsTracker.getCheckIns(),
+          weekly: HabitsTracker.getWeeklySummary(),
+          moodTrend: HabitsTracker.getMoodTrend(),
+          completionStats: HabitsTracker.getCompletionStats(
+            Utility.daysAgo(30).toISOString().split('T')[0],
+            new Date().toISOString().split('T')[0]
+          )
+        },
+
+        // Gamification
+        gamification: {
+          data: GamificationEngine.getGamificationData(),
+          statistics: GamificationEngine.getStatistics(),
+          levelProgress: GamificationEngine.getNextLevelProgress()
+        },
+
+        // Insights & alerts
+        insights: {
+          analysis: InsightsEngine.analyzeWellness(),
+          alerts: AlertSystem.generateAlerts(scores)
+        },
+
+        // Summary
+        summary: {
+          mainProblemArea: RecommendationEngine.identifyFocusAreas(scores).primary,
+          criticalAlerts: AlertSystem.getCriticalAlerts(scores).length,
+          goalsCompleted: GoalTracker.getCompletedGoals().length,
+          currentStreak: Object.values(HabitsTracker.getHabitsData()).length > 0 ? 'Active' : 'Inactive'
         }
-      },
+      };
 
-      burnoutAnalysis: {
-        riskLevel: ReportManager.getBurnoutRiskLevel(scores),
-        score: ScoringEngine?.calculateBurnoutRisk ? ScoringEngine.calculateBurnoutRisk(scores) : 0,
-        recommendation: ReportManager.getBurnoutRecommendation(scores)
-      },
-
-      goalProgress: {
-        summary: goalStats,
-        goals: goals.map(goal => ({
-          name: goal.name,
-          progress: goal.progress,
-          status: goal.status,
-          target: goal.targetScore,
-          current: goal.currentScore || 0
-        }))
-      },
-
-      trends: {
-        overallTrend: trend,
-        historyCount: history?.length || 0,
-        improvementSuggestions: ReportManager.getImprovementSuggestions(scores)
-      },
-
-      appointments: {
-        upcoming: upcomingBookings.length,
-        bookings: upcomingBookings.map(b => ({
-          type: b.sessionType,
-          date: b.date,
-          time: b.time,
-          confirmationNumber: b.confirmationNumber
-        }))
-      },
-
-      recommendations: ReportManager.getTopRecommendations(scores),
-
-      summary: ReportManager.generateReportSummary(scores, goalStats, trend)
-    };
-
-    return report;
+      return report;
+    } catch (error) {
+      console.error('❌ Error generating report:', error);
+      return { error: 'Failed to generate report. Check console for details.' };
+    }
   },
-
+  
   /**
    * Get score status
    */
@@ -370,6 +332,126 @@ const ReportManager = {
     URL.revokeObjectURL(url);
     
     console.log(`✓ Report exported: ${filename}`);
+  },
+
+  /**
+   * Export comprehensive wellness report with all new systems
+   * ENHANCED: Includes goals, habits, gamification, insights
+   */
+  exportEnhancedReport: () => {
+    try {
+      const report = ReportManager.generateWellnessReport();
+      
+      if (report.error) {
+        Utility.showFeedback(report.error, 'error');
+        return;
+      }
+
+      const jsonString = JSON.stringify(report, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      
+      const date = new Date().toISOString().split('T')[0];
+      ReportManager.downloadFile(blob, `neurowell-complete-report-${date}.json`);
+      Utility.showFeedback('✓ Report exported successfully!', 'success', 3000);
+    } catch (error) {
+      console.error('❌ Export error:', error);
+      Utility.showFeedback('Failed to export report', 'error');
+    }
+  },
+
+  /**
+   * Export monthly wellness summary
+   */
+  exportMonthlySummary: () => {
+    try {
+      const goals = GoalTracker.getGoals();
+      const habits = HabitsTracker.getWeeklySummary();
+      const gamification = GamificationEngine.getStatistics();
+      const assessmentData = Utility.getAssessmentData();
+
+      const summary = {
+        period: 'Last 30 days',
+        generated: new Date().toISOString(),
+        goals: {
+          completed: goals.filter(g => g.completed).length,
+          total: goals.length,
+          completionRate: GoalTracker.getOverallCompletion()
+        },
+        habits: habits,
+        gamification: gamification,
+        wellness: assessmentData ? assessmentData.scores : {}
+      };
+
+      const jsonString = JSON.stringify(summary, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const date = new Date().toISOString().split('T')[0];
+      ReportManager.downloadFile(blob, `neurowell-monthly-summary-${date}.json`);
+      Utility.showFeedback('✓ Monthly summary exported!', 'success');
+    } catch (error) {
+      console.error('❌ Export error:', error);
+      Utility.showFeedback('Failed to export summary', 'error');
+    }
+  },
+
+  /**
+   * Export backup of all user data
+   */
+  exportDataBackup: () => {
+    try {
+      const backup = {
+        timestamp: new Date().toISOString(),
+        version: '1.0',
+        assessment: StorageManager.getAssessmentResponses(),
+        scores: StorageManager.getWellnessScore(),
+        goals: GoalTracker.getGoals(),
+        habits: HabitsTracker.getHabitsData(),
+        checkins: HabitsTracker.getCheckIns(),
+        gamification: GamificationEngine.getGamificationData(),
+        streaks: JSON.parse(localStorage.getItem(CONSTANTS.STORAGE.STREAKS) || '{}')
+      };
+
+      const jsonString = JSON.stringify(backup, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const date = new Date().toISOString().split('T')[0];
+      ReportManager.downloadFile(blob, `neurowell-backup-${date}.json`);
+      Utility.showFeedback('✓ Data backup created!', 'success');
+    } catch (error) {
+      console.error('❌ Backup error:', error);
+      Utility.showFeedback('Failed to create backup', 'error');
+    }
+  },
+
+  /**
+   * Import data from backup file
+   */
+  importDataBackup: (fileInput) => {
+    try {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const backup = JSON.parse(e.target.result);
+          
+          // Restore all data
+          if (backup.assessment) StorageManager.saveAssessmentResponses(backup.assessment);
+          if (backup.goals) GoalTracker.saveGoals(backup.goals);
+          if (backup.gamification) GamificationEngine.saveGamificationData(backup.gamification);
+          if (backup.checkins) localStorage.setItem(CONSTANTS.STORAGE.CHECK_INS, JSON.stringify(backup.checkins));
+          if (backup.streaks) localStorage.setItem(CONSTANTS.STORAGE.STREAKS, JSON.stringify(backup.streaks));
+
+          Utility.showFeedback('✓ Data restored successfully! Please refresh the page.', 'success', 5000);
+        } catch (error) {
+          console.error('❌ Import parsing error:', error);
+          Utility.showFeedback('Invalid backup file format', 'error');
+        }
+      };
+      reader.readAsText(file);
+    } catch (error) {
+      console.error('❌ Import error:', error);
+      Utility.showFeedback('Failed to import backup', 'error');
+    }
   },
 
   // ===== UI RENDERING =====

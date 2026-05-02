@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Routine - NeuroWell</title>
+  <meta name="description" content="Your AI-generated personalised daily routine based on your wellness scores.">
+
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body { background: linear-gradient(180deg,#0f172a 0%,#020617 100%); min-height:100vh; }
+
+    /* ── Hero ── */
+    .routine-hero {
+      position:relative; padding:3rem 1.5rem 1.5rem; text-align:center; overflow:hidden;
+    }
+    .routine-hero::before {
+      content:''; position:absolute; top:-40%; left:50%; transform:translateX(-50%);
+      width:700px; height:700px;
+      background:radial-gradient(circle,rgba(139,92,246,0.09) 0%,transparent 70%);
+      border-radius:50%; z-index:0;
+    }
+    .routine-hero__content { position:relative; z-index:1; animation:fadeInUp 0.7s ease-out both; }
+    .routine-hero__badge {
+      display:inline-flex; align-items:center; gap:0.5rem;
+      padding:0.4rem 1rem; border-radius:999px;
+      background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.2);
+      color:var(--primary-light); font-size:0.78rem; font-weight:600;
+      letter-spacing:0.06em; text-transform:uppercase; margin-bottom:1rem;
+    }
+    .routine-hero h1 { font-size:clamp(2rem,4vw,2.75rem); font-weight:800; letter-spacing:-0.03em; color:#fff; margin-bottom:0.5rem; }
+    .routine-hero p  { color:var(--text-tertiary); font-size:1rem; max-width:500px; margin:0 auto; }
+
+    /* ── Wrapper ── */
+    .routine-wrapper { max-width:860px; margin:0 auto; padding:1rem 1.5rem 5rem; }
+
+    /* ── Persona card ── */
+    .persona-card {
+      border-radius:20px; padding:1.75rem 2rem;
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+      backdrop-filter:blur(12px); margin-bottom:2rem;
+      display:grid; grid-template-columns:auto 1fr auto; gap:1.5rem; align-items:center;
+    }
+    .persona-avatar { font-size:3rem; line-height:1; }
+    .persona-label  { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.07em; color:rgba(226,232,240,0.5); margin-bottom:0.25rem; }
+    .persona-title  { font-size:1.4rem; font-weight:800; margin-bottom:0.4rem; }
+    .persona-desc   { font-size:0.875rem; color:rgba(226,232,240,0.7); line-height:1.6; }
+    .persona-score  { text-align:center; }
+    .persona-score-num { font-size:2.5rem; font-weight:800; line-height:1; }
+    .persona-score-lbl { font-size:0.72rem; color:rgba(226,232,240,0.5); margin-top:0.25rem; text-transform:uppercase; letter-spacing:0.06em; }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:2rem;
+    }
+    .stat-pill {
+      background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+      border-radius:14px; padding:1rem; text-align:center;
+    }
+    .stat-pill-val { font-size:1.75rem; font-weight:700; }
+    .stat-pill-lbl { font-size:0.75rem; color:rgba(226,232,240,0.55); margin-top:0.25rem; }
+
+    /* ── Period header ── */
+    .period-header {
+      display:flex; align-items:center; gap:0.75rem;
+      margin:2rem 0 1rem; font-size:0.8rem; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.08em; color:rgba(226,232,240,0.5);
+    }
+    .period-header::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.07); }
+
+    /* ── Timeline ── */
+    .timeline { position:relative; padding-left:0; }
+
+    .timeline-item {
+      display:grid; grid-template-columns:72px 1fr; gap:1.25rem;
+      margin-bottom:1rem; position:relative;
+    }
+
+    .timeline-time {
+      text-align:right; padding-top:1.1rem;
+      font-size:0.78rem; font-weight:700; color:rgba(226,232,240,0.45);
+      white-space:nowrap; flex-shrink:0;
+    }
+
+    .timeline-card {
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+      border-radius:16px; padding:1.25rem 1.4rem; position:relative;
+      transition:transform 0.25s, border-color 0.25s, background 0.25s;
+      cursor:default;
+    }
+    .timeline-card:hover { transform:translateX(4px); background:rgba(255,255,255,0.055); }
+
+    .timeline-card::before {
+      content:''; position:absolute; left:-1.6rem; top:1.35rem;
+      width:10px; height:10px; border-radius:50%;
+      background:var(--dot-color,#667eea);
+      box-shadow:0 0 8px var(--dot-color,#667eea);
+    }
+
+    .tc-header { display:flex; align-items:center; gap:0.75rem; margin-bottom:0.6rem; flex-wrap:wrap; }
+    .tc-icon   { font-size:1.6rem; line-height:1; flex-shrink:0; }
+    .tc-title  { font-size:1rem; font-weight:700; color:#f1f5f9; flex:1; }
+    .tc-dur    {
+      background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.09);
+      border-radius:99px; padding:0.18rem 0.6rem; font-size:0.72rem;
+      color:rgba(226,232,240,0.6); white-space:nowrap; flex-shrink:0;
+    }
+
+    .tc-reason { font-size:0.835rem; color:rgba(226,232,240,0.62); line-height:1.55; margin-bottom:0.75rem; }
+
+    .tc-tips { list-style:none; padding:0; margin:0; border-top:1px solid rgba(255,255,255,0.06); padding-top:0.65rem; display:none; }
+    .tc-tips li { display:flex; gap:0.5rem; align-items:flex-start; font-size:0.79rem; color:rgba(226,232,240,0.55); margin-bottom:0.35rem; }
+    .tc-tips li::before { content:'›'; color:var(--dot-color,#667eea); flex-shrink:0; margin-top:1px; }
+
+    .tc-toggle {
+      font-size:0.75rem; color:rgba(226,232,240,0.4); cursor:pointer;
+      background:none; border:none; padding:0; display:flex; align-items:center; gap:0.3rem;
+      transition:color 0.2s;
+    }
+    .tc-toggle:hover { color:rgba(226,232,240,0.8); }
+
+    .timeline-card.open .tc-tips   { display:block; }
+    .timeline-card.open .tc-toggle { color:rgba(226,232,240,0.7); }
+
+    /* ── Category badges ── */
+    .cat-badge {
+      padding:0.15rem 0.55rem; border-radius:99px;
+      font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;
+    }
+
+    /* ── CTA ── */
+    .routine-cta {
+      background:var(--primary-gradient); border-radius:20px;
+      padding:2.5rem; text-align:center; margin-top:3rem; position:relative; overflow:hidden;
+    }
+    .routine-cta::before {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(circle at 30% 50%,rgba(255,255,255,0.1),transparent 60%);
+    }
+    .routine-cta h3 { color:#fff; font-size:1.4rem; font-weight:700; position:relative; margin-bottom:0.5rem; }
+    .routine-cta p  { color:rgba(255,255,255,0.85); position:relative; margin-bottom:1.5rem; font-size:0.9rem; }
+    .btn-row { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; position:relative; }
+
+    @media(max-width:620px) {
+      .timeline-item      { grid-template-columns:60px 1fr; gap:0.75rem; }
+      .persona-card       { grid-template-columns:auto 1fr; }
+      .persona-score      { display:none; }
+      .stats-row          { grid-template-columns:1fr 1fr; }
+    }
+  </style>
+</head>
+<body data-page="routine">
+  <div id="navbar-container"></div>
+
+  <main>
+    <div class="routine-hero">
+      <div class="routine-hero__content">
+        <span class="routine-hero__badge">📅 Daily Plan</span>
+        <h1>Your Personalised <span class="text-accent">Daily Routine</span></h1>
+        <p>A structured schedule generated from your wellness scores</p>
+      </div>
+    </div>
+
+    <div class="routine-wrapper">
+      <!-- Persona & stats injected here -->
+      <div id="routinePersona"></div>
+      <div id="routineStats"></div>
+
+      <!-- Timeline injected here -->
+      <div id="routineTimeline"></div>
+
+      <!-- CTA -->
+      <div class="routine-cta" id="routineCTA" style="display:none;">
+        <h3>Follow This Plan for 30 Days</h3>
+        <p>Consistent daily habits produce compound wellness improvements — even 60% adherence yields measurable results.</p>
+        <div class="btn-row">
+          <a href="recommendations.html" class="btn btn-secondary">💡 View Recommendations</a>
+          <a href="assessment.html" class="btn btn-primary" style="background:#fff;color:#6d28d9;">🔄 Retake Assessment</a>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div id="routineEmpty" style="display:none;" class="empty-state">
+        <div class="empty-state-icon">📅</div>
+        <h3>No Assessment Data</h3>
+        <p>Complete a wellness assessment to generate your personalised daily routine.</p>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem;">
+          <a href="assessment.html" class="btn btn-primary">Start Assessment</a>
+          <a href="dashboard.html" class="btn btn-secondary">← Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-container"></div>
+  <div id="loader-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="data/constants.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/routine.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        let scores = null;
+        let isDemo = false;
+
+        // 1. Try ScoringEngine
+        if (typeof ScoringEngine !== 'undefined') {
+          try {
+            const r = ScoringEngine.getScoreReport();
+            if (r && r.scores && typeof r.scores.physical === 'number') scores = r.scores;
+          } catch(e) { console.warn('ScoringEngine unavailable:', e.message); }
+        }
+
+        // 2. Try StorageManager directly
+        if (!scores && typeof StorageManager !== 'undefined') {
+          const saved = StorageManager.getWellnessScore();
+          if (saved && saved.scores && typeof saved.scores.physical === 'number') scores = saved.scores;
+        }
+
+        // 3. Demo mode
+        if (!scores) {
+          if (typeof NeuroUtils !== 'undefined') {
+            scores = NeuroUtils.getDemoData().scores;
+            isDemo = true;
+            NeuroUtils.showDemoBanner();
+          } else {
+            document.getElementById('routineEmpty').style.display = 'block';
+            return;
+          }
+        }
+
+        const routine = RoutineEngine.generateRoutine(scores);
+        if (!routine) { document.getElementById('routineEmpty').style.display = 'block'; return; }
+
+        renderPersona(routine);
+        renderStats(routine);
+        renderTimeline(routine);
+        document.getElementById('routineCTA').style.display = 'block';
+
+      } catch (err) {
+        console.error('❌ Routine page error:', err);
+        if (typeof NeuroUtils !== 'undefined') {
+          NeuroUtils.showUIError('Could not generate your routine. Please try refreshing.', 'routineTimeline');
+        }
+      }
+    });
+
+    // ── Render persona card ──────────────────────────────────────────────
+    function renderPersona(r) {
+      const el = document.getElementById('routinePersona');
+      if (!el) return;
+      const { persona, scores, projectedScore } = r;
+      el.innerHTML = `
+        <div class="persona-card" style="border-left:4px solid ${persona.color};">
+          <div class="persona-avatar">${persona.emoji}</div>
+          <div>
+            <div class="persona-label">Your Wellness Persona</div>
+            <div class="persona-title" style="color:${persona.color};">${persona.label}</div>
+            <div class="persona-desc">${persona.desc}</div>
+          </div>
+          <div class="persona-score">
+            <div class="persona-score-num" style="color:${persona.color};">${scores.overall}%</div>
+            <div class="persona-score-lbl">Current<br>Wellness</div>
+          </div>
+        </div>`;
+    }
+
+    // ── Render stats row ─────────────────────────────────────────────────
+    function renderStats(r) {
+      const el = document.getElementById('routineStats');
+      if (!el) return;
+      const catColors = { physical:'#10b981', mental:'#a855f7', emotional:'#f43f5e' };
+      el.innerHTML = `
+        <div class="stats-row">
+          <div class="stat-pill">
+            <div class="stat-pill-val" style="color:#10b981;">${r.scores.physical}%</div>
+            <div class="stat-pill-lbl">💪 Physical</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-pill-val" style="color:#a855f7;">${r.scores.mental}%</div>
+            <div class="stat-pill-lbl">🧠 Mental</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-pill-val" style="color:#f43f5e;">${r.scores.emotional}%</div>
+            <div class="stat-pill-lbl">❤️ Emotional</div>
+          </div>
+        </div>`;
+    }
+
+    // ── Render timeline ──────────────────────────────────────────────────
+    function renderTimeline(r) {
+      const el = document.getElementById('routineTimeline');
+      if (!el) return;
+
+      const catColors  = { physical:'#10b981', mental:'#a855f7', emotional:'#f43f5e' };
+      const catLabels  = { physical:'Physical',  mental:'Mental',   emotional:'Emotional' };
+      const periodColors = { Morning:'#f59e0b', Afternoon:'#3b82f6', Evening:'#a855f7', Night:'#1e293b' };
+
+      let html = '';
+      let lastPeriod = '';
+
+      r.blocks.forEach((block, idx) => {
+        const dotColor = block.color || catColors[block.category] || '#667eea';
+        const catColor = catColors[block.category] || '#667eea';
+
+        // Period header
+        if (block.period !== lastPeriod) {
+          const periodIcons = { Morning:'🌅', Afternoon:'☀️', Evening:'🌆', Night:'🌙' };
+          html += `
+            <div class="period-header" style="color:${periodColors[block.period] || '#667eea'};">
+              ${periodIcons[block.period] || '•'} ${block.period}
+            </div>`;
+          lastPeriod = block.period;
+        }
+
+        const tips = block.tips.map(t => `<li>${t}</li>`).join('');
+
+        html += `
+          <div class="timeline-item">
+            <div class="timeline-time">${block.time}</div>
+            <div class="timeline-card" style="--dot-color:${dotColor};" id="tc-${idx}">
+              <div class="tc-header">
+                <span class="tc-icon">${block.icon}</span>
+                <span class="tc-title">${block.title}</span>
+                <span class="tc-dur">⏱ ${block.duration}</span>
+                <span class="cat-badge" style="background:${catColor}18;color:${catColor};border:1px solid ${catColor}33;">
+                  ${catLabels[block.category] || block.category}
+                </span>
+              </div>
+              <div class="tc-reason">${block.reason}</div>
+              <ul class="tc-tips">${tips}</ul>
+              <button class="tc-toggle" onclick="toggleCard(${idx})">
+                <i class="fas fa-chevron-down" id="tc-icon-${idx}" style="font-size:0.7rem;transition:transform 0.25s;"></i>
+                <span id="tc-lbl-${idx}">Show tips</span>
+              </button>
+            </div>
+          </div>`;
+      });
+
+      el.innerHTML = `<div class="timeline">${html}</div>`;
+    }
+
+    // ── Toggle tips ──────────────────────────────────────────────────────
+    function toggleCard(idx) {
+      const card = document.getElementById(`tc-${idx}`);
+      const icon = document.getElementById(`tc-icon-${idx}`);
+      const lbl  = document.getElementById(`tc-lbl-${idx}`);
+      if (!card) return;
+      const open = card.classList.toggle('open');
+      if (icon) icon.style.transform = open ? 'rotate(180deg)' : '';
+      if (lbl)  lbl.textContent = open ? 'Hide tips' : 'Show tips';
+    }
+  </script>
+</body>
+</html>

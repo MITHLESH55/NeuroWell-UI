@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Core Intelligence Module — NeuroWell</title>
+  <meta name="description" content="NeuroWell's AI-powered wellness prediction, trend analysis, and smart insights engine.">
+  <link rel="stylesheet" href="../css/intelligence.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+<body class="cim-page">
+
+<!-- Demo banner (shown when no real data) -->
+<div id="cimDemoBanner" class="cim-demo-bar" style="display:none">
+  🎭 <strong>Demo Mode</strong> — showing sample data.
+  <a href="../assessment.html" style="color:#fff;text-decoration:underline;margin-left:6px">Take the real assessment →</a>
+</div>
+
+<div class="cim-shell">
+
+  <!-- Hero -->
+  <div class="cim-hero">
+    <div class="cim-hero__badge">🧠 Core Intelligence Module v2.0</div>
+    <h1 class="cim-hero__title">
+      NeuroWell <span class="accent">Intelligence</span>
+    </h1>
+    <p class="cim-hero__sub">
+      Enter today's wellness metrics to run a full prediction, trend analysis &amp; smart insights report.
+    </p>
+  </div>
+
+  <!-- Back nav -->
+  <a href="../dashboard.html" class="cim-back">← Back to Dashboard</a>
+
+  <!-- Input Form -->
+  <div class="cim-form-card">
+    <div class="cim-form-title">📋 Daily Wellness Input</div>
+    <p class="cim-form-desc">Drag the sliders to reflect your day. Results update instantly after you run the analysis.</p>
+
+    <div class="cim-input-grid">
+      <!-- Sleep -->
+      <div class="cim-field">
+        <label class="cim-label" for="inputSleep"><span class="emoji">😴</span> Sleep Hours</label>
+        <div class="cim-range-wrap">
+          <span class="cim-range-value" id="valSleep">7.0h</span>
+          <input class="cim-range" type="range" id="inputSleep" min="3" max="12" step="0.5" value="7">
+        </div>
+        <div class="cim-range-labels"><span>3h</span><span>Ideal: 7-8h</span><span>12h</span></div>
+      </div>
+      <!-- Activity -->
+      <div class="cim-field">
+        <label class="cim-label" for="inputActivity"><span class="emoji">💪</span> Activity Level</label>
+        <div class="cim-range-wrap">
+          <span class="cim-range-value" id="valActivity">5/10</span>
+          <input class="cim-range" type="range" id="inputActivity" min="1" max="10" step="1" value="5">
+        </div>
+        <div class="cim-range-labels"><span>Sedentary</span><span>Active</span><span>Athlete</span></div>
+      </div>
+      <!-- Stress -->
+      <div class="cim-field">
+        <label class="cim-label" for="inputStress"><span class="emoji">😰</span> Stress Level</label>
+        <div class="cim-range-wrap">
+          <span class="cim-range-value" id="valStress">4/10</span>
+          <input class="cim-range" type="range" id="inputStress" min="1" max="10" step="1" value="4">
+        </div>
+        <div class="cim-range-labels"><span>Calm</span><span>Moderate</span><span>Critical</span></div>
+      </div>
+      <!-- Screen Time -->
+      <div class="cim-field">
+        <label class="cim-label" for="inputScreen"><span class="emoji">📱</span> Screen Time (hrs)</label>
+        <div class="cim-range-wrap">
+          <span class="cim-range-value" id="valScreen">4.0h</span>
+          <input class="cim-range" type="range" id="inputScreen" min="0" max="16" step="0.5" value="4">
+        </div>
+        <div class="cim-range-labels"><span>0h</span><span>Healthy: &lt;4h</span><span>16h</span></div>
+      </div>
+    </div>
+
+    <button class="cim-run-btn" id="runCIMBtn" onclick="runAnalysis()">
+      <span class="btn-icon">🚀</span> Run Intelligence Analysis
+    </button>
+  </div>
+
+  <!-- Dashboard (hidden until run) -->
+  <div class="cim-dashboard" id="cimDashboard">
+
+    <!-- Metric chips summary -->
+    <div class="cim-metric-chips" id="metricChips"></div>
+
+    <!-- Row 1: Score + Categories + Risk -->
+    <div class="cim-grid-main">
+
+      <!-- Score Ring + categories -->
+      <div class="cim-card cim-score-card">
+        <div class="cim-card__label">🎯 Wellness Score</div>
+        <div class="cim-ring-wrap">
+          <svg class="cim-ring-svg" width="140" height="140" viewBox="0 0 140 140">
+            <defs>
+              <linearGradient id="cimGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#667eea"/>
+                <stop offset="100%" stop-color="#764ba2"/>
+              </linearGradient>
+            </defs>
+            <circle class="cim-ring-bg" cx="70" cy="70" r="58"/>
+            <circle class="cim-ring-progress" id="ringProgress" cx="70" cy="70" r="58"
+              stroke-dasharray="364.4" stroke-dashoffset="364.4"/>
+          </svg>
+          <div class="cim-ring-text">
+            <div class="cim-ring-number" id="ringNumber">--</div>
+            <div class="cim-ring-unit">/ 100</div>
+          </div>
+        </div>
+        <div id="scoreTrendBadge" style="text-align:center;margin-top:0.5rem"></div>
+
+        <!-- Category bars -->
+        <div class="cim-cat-list" id="catList" style="margin-top:1.5rem"></div>
+      </div>
+
+      <!-- Risk Panel -->
+      <div class="cim-card cim-risk-card">
+        <div class="cim-card__label">⚡ Prediction Engine — Risk Report</div>
+        <div id="riskHeader"></div>
+        <div id="riskItems"></div>
+        <div id="riskEmpty" class="cim-empty" style="display:none">
+          <div class="cim-empty__icon">🌟</div>
+          <div class="cim-empty__msg">No significant risks detected. Your metrics look great!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: 30-Day Trend Chart -->
+    <div class="cim-card" style="margin-bottom:1.25rem">
+      <div class="cim-section-title">📈 Health Timeline — Last 14 Days + 30-Day Projection</div>
+      <div class="cim-chart-wrap">
+        <canvas id="cimTrendChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Row 3: Projection + Insights -->
+    <div class="cim-grid-2">
+
+      <!-- Projection Cards -->
+      <div class="cim-card">
+        <div class="cim-section-title">🔮 Future Projection</div>
+        <div id="trendSummary" style="font-size:0.875rem;color:var(--cim-text-2);margin-bottom:1.25rem"></div>
+        <div class="cim-proj-grid" id="projCards"></div>
+      </div>
+
+      <!-- Smart Insights -->
+      <div class="cim-card">
+        <div class="cim-section-title">💡 Smart Insights</div>
+        <div class="cim-insights-list" id="insightsList"></div>
+      </div>
+    </div>
+
+    <!-- Row 4: History Stats -->
+    <div class="cim-card" style="margin-top:1.25rem">
+      <div class="cim-section-title">📊 Digital Twin — History Stats</div>
+      <div class="cim-stats-row" id="historyStats"></div>
+      <div style="text-align:center;margin-top:1rem">
+        <button onclick="downloadHistory()" style="background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.25);color:#c4b5fd;padding:0.6rem 1.5rem;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer">
+          📥 Export History JSON
+        </button>
+        <button onclick="clearHistory()" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:#fca5a5;padding:0.6rem 1.5rem;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;margin-left:0.75rem">
+          🗑️ Clear History
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /cimDashboard -->
+</div><!-- /cim-shell -->
+
+<!-- Scripts — load dependencies first -->
+<script>
+// Minimal stubs so modules don't crash if loaded standalone
+window.CONSTANTS = window.CONSTANTS || { STORAGE:{}, SCORE_RANGES:{}, BURNOUT_RISK:{}, ASSESSMENT:{TOTAL_QUESTIONS:30} };
+window.QUESTIONS = window.QUESTIONS || [];
+</script>
+<script src="../js/utils.js"></script>
+<script src="../data/constants.js"></script>
+<script src="../data/questions.js"></script>
+<script src="../js/storage.js"></script>
+<script src="../js/scoring.js"></script>
+<script src="../js/analysis.js"></script>
+<script src="../js/wellnessPredictionEngine.js"></script>
+<script src="../js/insights.js"></script>
+<script src="../js/coreIntelligence.js"></script>
+
+<script>
+// ── Slider live labels ──────────────────────────────────────────────
+const sliders = [
+  { el: document.getElementById('inputSleep'),    out: document.getElementById('valSleep'),    fmt: v => v + 'h' },
+  { el: document.getElementById('inputActivity'), out: document.getElementById('valActivity'), fmt: v => v + '/10' },
+  { el: document.getElementById('inputStress'),   out: document.getElementById('valStress'),   fmt: v => v + '/10' },
+  { el: document.getElementById('inputScreen'),   out: document.getElementById('valScreen'),   fmt: v => v + 'h' },
+];
+sliders.forEach(s => {
+  s.el.addEventListener('input', () => { s.out.textContent = s.fmt(s.el.value); });
+  // Track fill colour
+  s.el.addEventListener('input', () => updateSliderFill(s.el));
+  updateSliderFill(s.el);
+});
+
+function updateSliderFill(input) {
+  const pct = ((input.value - input.min) / (input.max - input.min)) * 100;
+  input.style.background = `linear-gradient(to right, #8b5cf6 ${pct}%, rgba(255,255,255,0.1) ${pct}%)`;
+}
+
+// ── Chart instance ──────────────────────────────────────────────────
+let trendChart = null;
+
+// ── Main analysis runner ────────────────────────────────────────────
+function runAnalysis(isDemo = false) {
+  const btn = document.getElementById('runCIMBtn');
+  btn.textContent = '⏳ Analysing…';
+  btn.disabled = true;
+
+  const metrics = {
+    sleep:      parseFloat(document.getElementById('inputSleep').value),
+    activity:   parseInt(document.getElementById('inputActivity').value),
+    stress:     parseInt(document.getElementById('inputStress').value),
+    screenTime: parseFloat(document.getElementById('inputScreen').value)
+  };
+
+  // Run full CIM pipeline
+  const result = CoreIntelligenceModule.run(metrics);
+  result.history = (typeof AnalysisEngine !== 'undefined') ? AnalysisEngine.getRecent(14) : [];
+
+  renderDashboard(result);
+
+  btn.innerHTML = '<span class="btn-icon">✅</span> Analysis Complete — Re-run';
+  btn.disabled = false;
+
+  document.getElementById('cimDashboard').classList.add('visible');
+  document.getElementById('cimDashboard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Render functions ────────────────────────────────────────────────
+function renderDashboard(r) {
+  renderMetricChips(r.metrics);
+  renderScoreRing(r.scores.overall);
+  renderCategoryBars(r.scores);
+  renderRiskPanel(r.prediction);
+  renderTrendChart(r);
+  renderProjection(r.projection, r.trend);
+  renderInsights(r.smartInsights);
+  renderHistoryStats(r.historySummary);
+}
+
+function renderMetricChips(m) {
+  document.getElementById('metricChips').innerHTML =
+    `<div class="cim-chip"><span class="cim-chip__label">Sleep</span> ${m.sleep}h</div>
+     <div class="cim-chip"><span class="cim-chip__label">Activity</span> ${m.activity}/10</div>
+     <div class="cim-chip"><span class="cim-chip__label">Stress</span> ${m.stress}/10</div>
+     <div class="cim-chip"><span class="cim-chip__label">Screen</span> ${m.screenTime}h</div>
+     <div class="cim-chip"><span class="cim-chip__label">Generated</span> ${new Date().toLocaleTimeString()}</div>`;
+}
+
+function renderScoreRing(score) {
+  const CIRC = 364.4;
+  const offset = CIRC - (CIRC * score / 100);
+  const ring = document.getElementById('ringProgress');
+  document.getElementById('ringNumber').textContent = score;
+  setTimeout(() => { ring.style.strokeDashoffset = offset; }, 100);
+
+  const label = score >= 80 ? '🌟 Excellent' : score >= 65 ? '✅ Good' : score >= 50 ? '⚡ Fair' : '⚠️ Needs Attention';
+  const color = score >= 80 ? '#10b981' : score >= 65 ? '#6366f1' : score >= 50 ? '#f59e0b' : '#ef4444';
+  document.getElementById('scoreTrendBadge').innerHTML =
+    `<span class="cim-score-trend" style="background:${color}22;color:${color};border:1px solid ${color}44">${label}</span>`;
+}
+
+function renderCategoryBars(scores) {
+  const cats = [
+    { key:'physical',  label:'Physical', icon:'💪', color:'#667eea' },
+    { key:'mental',    label:'Mental',   icon:'🧠', color:'#a855f7' },
+    { key:'emotional', label:'Emotional',icon:'❤️', color:'#f43f5e' },
+  ];
+  document.getElementById('catList').innerHTML = cats.map(c => `
+    <div class="cim-cat-item">
+      <div class="cim-cat-header">
+        <span class="cim-cat-name">${c.icon} ${c.label}</span>
+        <span class="cim-cat-val" style="color:${c.color}">${scores[c.key]}%</span>
+      </div>
+      <div class="cim-progress-track">
+        <div class="cim-progress-fill" id="bar_${c.key}" style="background:${c.color}"></div>
+      </div>
+    </div>`).join('');
+  cats.forEach(c => {
+    setTimeout(() => {
+      const el = document.getElementById('bar_' + c.key);
+      if (el) el.style.width = scores[c.key] + '%';
+    }, 200);
+  });
+}
+
+function renderRiskPanel(pred) {
+  if (!pred) return;
+  const rl = pred.riskLevel || {};
+  document.getElementById('riskHeader').innerHTML = `
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;padding:1rem;border-radius:12px;background:${rl.bg||'rgba(255,255,255,0.04)'}">
+      <div style="font-size:2.5rem">${rl.icon||'⚡'}</div>
+      <div>
+        <div class="cim-risk-level" style="color:${rl.color||'#f59e0b'}">${rl.label||'Analysing...'}</div>
+        <div class="cim-risk-label" style="color:${rl.color||'#f59e0b'}">Overall Risk Assessment</div>
+        <div style="font-size:0.8rem;color:var(--cim-text-2)">${pred.summary||''}</div>
+      </div>
+    </div>`;
+
+  const risks = pred.risks || [];
+  if (!risks.length) {
+    document.getElementById('riskEmpty').style.display = 'block';
+    document.getElementById('riskItems').innerHTML = '';
+    return;
+  }
+  document.getElementById('riskEmpty').style.display = 'none';
+  document.getElementById('riskItems').innerHTML = risks.map(r => `
+    <div class="cim-risk-item cim-risk-item--${r.severity}">
+      <div class="cim-risk-item__icon">${r.icon}</div>
+      <div class="cim-risk-item__body">
+        <div class="cim-risk-item__title">${r.label}</div>
+        <div class="cim-risk-item__msg">${r.message}</div>
+        <div class="cim-risk-item__advice">💡 ${r.advice}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderTrendChart(r) {
+  const canvas = document.getElementById('cimTrendChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+  if (trendChart) { trendChart.destroy(); trendChart = null; }
+
+  const history    = r.history || [];
+  const projection = r.projection;
+
+  const histLabels = history.map(h => h.date.slice(5));
+  const histData   = history.map(h => h.score);
+  const projPts    = projection ? projection.points.slice(1, 16) : [];
+  const projLabels = projPts.map(p => p.date.slice(5) + '*');
+  const projData   = projPts.map(p => p.score);
+
+  const ctx      = canvas.getContext('2d');
+  const grad     = ctx.createLinearGradient(0, 0, 0, 260);
+  grad.addColorStop(0, 'rgba(102,126,234,0.35)');
+  grad.addColorStop(1, 'rgba(102,126,234,0.02)');
+  const grad2    = ctx.createLinearGradient(0, 0, 0, 260);
+  grad2.addColorStop(0, 'rgba(168,85,247,0.25)');
+  grad2.addColorStop(1, 'rgba(168,85,247,0.02)');
+
+  trendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [...histLabels, ...projLabels],
+      datasets: [
+        {
+          label: 'History',
+          data: [...histData, ...new Array(projLabels.length).fill(null)],
+          borderColor: '#667eea', backgroundColor: grad,
+          borderWidth: 3, pointRadius: 5, pointBackgroundColor: '#667eea',
+          pointBorderColor: '#0a0f1e', pointBorderWidth: 2,
+          tension: 0.4, fill: true
+        },
+        {
+          label: 'Projection',
+          data: [...new Array(histLabels.length).fill(null), ...projData],
+          borderColor: '#a855f7', backgroundColor: grad2,
+          borderWidth: 2, borderDash: [6, 4],
+          pointRadius: 4, pointBackgroundColor: '#a855f7',
+          pointBorderColor: '#0a0f1e', pointBorderWidth: 2,
+          tension: 0.4, fill: true
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 1000, easing: 'easeInOutQuart' },
+      scales: {
+        y: { beginAtZero: false, min: 20, max: 100,
+             ticks: { color:'#94a3b8', callback: v => v + '%' },
+             grid: { color:'rgba(255,255,255,0.05)' } },
+        x: { ticks: { color:'#94a3b8', maxTicksLimit: 12 },
+             grid: { display: false } }
+      },
+      plugins: {
+        legend: { labels: { color:'#cbd5e1', usePointStyle: true } },
+        tooltip: {
+          backgroundColor:'rgba(10,15,30,0.95)', titleColor:'#f1f5f9', bodyColor:'#94a3b8',
+          borderColor:'#667eea', borderWidth:1, padding:12,
+          callbacks: { label: ctx => `Score: ${ctx.raw}%` }
+        }
+      }
+    }
+  });
+}
+
+function renderProjection(proj, trend) {
+  const t = trend || {};
+  document.getElementById('trendSummary').innerHTML =
+    `<span style="color:${t.color||'#f59e0b'}">${t.emoji||'→'}</span> 
+     <strong style="color:${t.color||'#f59e0b'}">${t.direction||'Stable'}</strong> — ${t.description||'Analysing trend...'}
+     <span style="color:var(--cim-text-3);font-size:0.78rem"> (${t.confidence||'Low'} confidence)</span>`;
+
+  if (!proj) { document.getElementById('projCards').innerHTML = ''; return; }
+  const cards = [
+    { lbl:'7-Day', val: proj.day7  || '--', color:'#667eea' },
+    { lbl:'14-Day',val: proj.day14 || '--', color:'#a855f7' },
+    { lbl:'30-Day',val: proj.day30 || '--', color:'#10b981' },
+  ];
+  document.getElementById('projCards').innerHTML = cards.map(c => `
+    <div class="cim-proj-card">
+      <div class="cim-proj-val" style="color:${c.color}">${typeof c.val === 'number' ? c.val + '%' : c.val}</div>
+      <div class="cim-proj-lbl">${c.lbl} Forecast</div>
+    </div>`).join('');
+}
+
+function renderInsights(insights) {
+  if (!insights || !insights.length) {
+    document.getElementById('insightsList').innerHTML =
+      '<div class="cim-empty"><div class="cim-empty__icon">✅</div><div class="cim-empty__msg">All metrics look healthy — no critical insights.</div></div>';
+    return;
+  }
+  document.getElementById('insightsList').innerHTML = insights.map(ins => `
+    <div class="cim-insight-item cim-insight-item--${ins.type}">
+      <div class="cim-insight-icon">${ins.icon}</div>
+      <div>
+        <div class="cim-insight-title">${ins.title}</div>
+        <div class="cim-insight-msg">${ins.message}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderHistoryStats(stats) {
+  if (!stats) {
+    document.getElementById('historyStats').innerHTML =
+      '<div style="grid-column:1/-1;text-align:center;color:var(--cim-text-3);font-size:0.875rem">No history yet — run the analysis to start building your Digital Twin.</div>';
+    return;
+  }
+  const items = [
+    { val: stats.totalRecords, lbl: 'Days Logged' },
+    { val: stats.average + '%', lbl: 'Avg Wellness' },
+    { val: stats.best + '%',    lbl: 'Best Score' },
+    { val: stats.lowest + '%',  lbl: 'Lowest Score' },
+  ];
+  document.getElementById('historyStats').innerHTML = items.map(i => `
+    <div class="cim-stat-mini">
+      <div class="cim-stat-mini__val">${i.val}</div>
+      <div class="cim-stat-mini__lbl">${i.lbl}</div>
+    </div>`).join('');
+}
+
+// ── Utility actions ─────────────────────────────────────────────────
+function downloadHistory() {
+  if (typeof AnalysisEngine === 'undefined') return;
+  const data = AnalysisEngine.exportData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), { href: url, download: 'neurowell-history.json' });
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function clearHistory() {
+  if (!confirm('Clear all Digital Twin history? This cannot be undone.')) return;
+  if (typeof AnalysisEngine !== 'undefined') AnalysisEngine.clearHistory();
+  document.getElementById('historyStats').innerHTML =
+    '<div style="grid-column:1/-1;text-align:center;color:var(--cim-text-3);font-size:0.875rem">History cleared.</div>';
+}
+
+// ── Auto-load on page open ──────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  sliders.forEach(s => updateSliderFill(s.el));
+
+  // If existing history, seed sliders from last record and auto-run
+  if (typeof AnalysisEngine !== 'undefined') {
+    const recent = AnalysisEngine.getRecent(1);
+    if (recent && recent.length > 0) {
+      const r = recent[0];
+      if (r.sleep)      { document.getElementById('inputSleep').value    = r.sleep;      document.getElementById('valSleep').textContent    = r.sleep + 'h'; }
+      if (r.activity)   { document.getElementById('inputActivity').value = r.activity;   document.getElementById('valActivity').textContent = r.activity + '/10'; }
+      if (r.stress)     { document.getElementById('inputStress').value   = r.stress;     document.getElementById('valStress').textContent   = r.stress + '/10'; }
+      if (r.screenTime) { document.getElementById('inputScreen').value   = r.screenTime; document.getElementById('valScreen').textContent   = r.screenTime + 'h'; }
+      sliders.forEach(s => updateSliderFill(s.el));
+      runAnalysis();
+    } else {
+      // Show demo
+      document.getElementById('cimDemoBanner').style.display = 'block';
+      AnalysisEngine.seedSampleData(14);
+      document.getElementById('inputSleep').value    = 6.2;
+      document.getElementById('inputActivity').value = 4;
+      document.getElementById('inputStress').value   = 7;
+      document.getElementById('inputScreen').value   = 8;
+      document.getElementById('valSleep').textContent    = '6.2h';
+      document.getElementById('valActivity').textContent = '4/10';
+      document.getElementById('valStress').textContent   = '7/10';
+      document.getElementById('valScreen').textContent   = '8h';
+      sliders.forEach(s => updateSliderFill(s.el));
+      runAnalysis(true);
+    }
+  }
+});
+</script>
+</body>
+</html>

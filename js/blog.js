@@ -416,9 +416,12 @@ class BlogManager {
         event.preventDefault();
         const email = event.target.querySelector('.newsletter-input').value;
 
-        // For now, just show a success message
-        // In a real implementation, this would send to backend
-        alert('Thank you for subscribing! We\'ll keep you updated with the latest wellness insights.');
+        // Show success toast instead of blocking alert()
+        if (typeof NeuroUtils !== 'undefined') {
+            NeuroUtils.showToast('Thank you for subscribing! We\'ll keep you updated with wellness insights.', 'success', 4000);
+        } else {
+            console.info('ℹ️ Newsletter signup:', email);
+        }
         event.target.querySelector('.newsletter-input').value = '';
     }
 
@@ -431,8 +434,10 @@ class BlogManager {
     }
 
     showError(message) {
-        // Simple error display - could be enhanced with a toast system
-        alert(message);
+        console.error('❌ Blog error:', message);
+        if (typeof NeuroUtils !== 'undefined') {
+            NeuroUtils.showToast(message, 'error', 5000);
+        }
     }
 
     debounce(func, wait) {

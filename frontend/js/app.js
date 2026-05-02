@@ -17,6 +17,11 @@ const AppManager = {
       console.warn('⚠️  localStorage not available - limited functionality');
     }
 
+    // Initialize demo mode if no user data exists
+    if (typeof DemoManager !== 'undefined') {
+      DemoManager.autoInitIfNeeded();
+    }
+
     // Load all reusable components
     AppManager.loadComponents();
 
@@ -59,6 +64,16 @@ const AppManager = {
           document.body.appendChild(temp.firstElementChild);
         })
         .catch(e => console.error('Error loading loader component:', e));
+    }
+    
+    // Update demo badge after components are loaded
+    if (typeof DemoManager !== 'undefined' && DemoManager.isDemo()) {
+      setTimeout(() => {
+        const demoBadge = document.getElementById('demoBadge');
+        if (demoBadge) {
+          demoBadge.style.display = 'flex';
+        }
+      }, 200);
     }
   },
 

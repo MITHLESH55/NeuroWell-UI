@@ -71,6 +71,27 @@
   align-items: center;
 }
 
+/* ===== DEMO MODE BADGE ===== */
+.navbar-demo-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: white;
+  box-shadow: var(--shadow-sm);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.navbar-demo-badge:hover {
+  box-shadow: var(--shadow-md);
+  transform: scale(1.05);
+  transition: all var(--transition-base);
+}
+
 .nav-toggle {
   display: none;
   background: none;

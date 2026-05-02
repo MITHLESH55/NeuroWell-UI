@@ -13,75 +13,97 @@ const DashboardManager = {
   init: async () => {
     console.log('📊 Initializing Dashboard...');
 
-    // Check if user is logged in
-    if (!AuthManager.isLoggedIn()) {
-      console.warn('⚠️ User not logged in, redirecting to login...');
-      window.location.href = 'login.html';
-      return;
-    }
-
-    AppManager.showLoader('Loading Dashboard', 'Fetching your wellness data...');
+    // Safely show loader
+    try {
+      if (typeof AppManager !== 'undefined' && AppManager.showLoader) {
+        AppManager.showLoader('Loading Dashboard', 'Fetching your wellness data...');
+      }
+    } catch (_) {}
 
     try {
-      // Render welcome section
+      // Render welcome section (safe even without auth)
       DashboardManager.renderWelcomeSection();
 
-      // Try to load from backend first
-      let scoreReport = await APIService.loadLatestAssessment();
+      let scoreReport = null;
+      let isDemo = false;
 
+      // 1. Try backend API
+      try {
+        if (typeof APIService !== 'undefined' && APIService.loadLatestAssessment) {
+          scoreReport = await APIService.loadLatestAssessment();
+        }
+      } catch (apiErr) {
+        console.warn('⚠️ Backend unavailable, falling back to localStorage:', apiErr.message);
+      }
+
+      // 2. Try localStorage via central utility
       if (!scoreReport) {
-        // Fallback to local storage
-        console.log('🔄 No backend data, checking local storage...');
-        scoreReport = ScoringEngine.getScoreReport();
-
-        if (!scoreReport) {
-          DashboardManager.showNoDataView();
-          AppManager.hideLoader();
-          return;
+        const assessmentData = (typeof NeuroUtils !== 'undefined')
+          ? NeuroUtils.getAssessmentData()
+          : null;
+        if (assessmentData) {
+          scoreReport = assessmentData.scoreReport;
+          isDemo = assessmentData.isDemo || false;
         }
       }
 
-      // Render dashboard sections
-      DashboardManager.renderCircularProgress(scoreReport);
-      DashboardManager.renderScoreInsights(scoreReport);
-      DashboardManager.renderOverviewCards(scoreReport);
-      DashboardManager.renderCategoryChart(scoreReport);
-      DashboardManager.renderBurnoutGaugeSpeedometer(scoreReport);
-      DashboardManager.renderWellnessProjection(scoreReport);
-      DashboardManager.renderAssessmentTrendAnalysis(scoreReport);
-      DashboardManager.renderTrendChart(scoreReport);
+      // 3. No data at all — show actionable empty state
+      if (!scoreReport) {
+        DashboardManager.showNoDataView();
+        try { if (typeof AppManager !== 'undefined') AppManager.hideLoader(); } catch (_) {}
+        return;
+      }
 
-      AppManager.hideLoader();
+      // Show demo banner if running without real data
+      if (isDemo && typeof NeuroUtils !== 'undefined') {
+        NeuroUtils.showDemoBanner();
+      }
+
+      // Render each section in its own try-catch to prevent cascade failures
+      const renderSteps = [
+        ['CircularProgress',        () => DashboardManager.renderCircularProgress(scoreReport)],
+        ['ScoreInsights',           () => DashboardManager.renderScoreInsights(scoreReport)],
+        ['OverviewCards',           () => DashboardManager.renderOverviewCards(scoreReport)],
+        ['IntelligentInsights',     () => DashboardManager.renderIntelligentInsights(scoreReport)],
+        ['CategoryChart',           () => DashboardManager.renderCategoryChart(scoreReport)],
+        ['BurnoutGaugeSpeedometer', () => DashboardManager.renderBurnoutGaugeSpeedometer(scoreReport)],
+        ['WellnessProjection',      () => DashboardManager.renderWellnessProjection()],
+        ['AssessmentTrendAnalysis', () => DashboardManager.renderAssessmentTrendAnalysis(scoreReport)],
+        ['TrendChart',              () => DashboardManager.renderTrendChart(scoreReport)],
+        ['CheckinWidget',           () => DashboardManager.renderCheckinWidget()],
+      ];
+
+      for (const [stepName, fn] of renderSteps) {
+        try {
+          fn();
+        } catch (stepErr) {
+          console.error(`❌ Dashboard render step [${stepName}] failed:`, stepErr);
+        }
+      }
+
+      try { if (typeof AppManager !== 'undefined') AppManager.hideLoader(); } catch (_) {}
       console.log('✅ Dashboard Ready');
 
-    } catch (error) {
-      console.error('❌ Dashboard initialization error:', error);
-      AppManager.hideLoader();
+    } catch (fatalErr) {
+      console.error('❌ Dashboard fatal error:', fatalErr);
+      try { if (typeof AppManager !== 'undefined') AppManager.hideLoader(); } catch (_) {}
 
-      // Fallback to local data
-      try {
-        const scoreReport = ScoringEngine.getScoreReport();
-        if (scoreReport) {
-          DashboardManager.renderCircularProgress(scoreReport);
-          DashboardManager.renderScoreInsights(scoreReport);
-          DashboardManager.renderOverviewCards(scoreReport);
-          DashboardManager.renderCategoryChart(scoreReport);
-          DashboardManager.renderBurnoutGaugeSpeedometer(scoreReport);
-          DashboardManager.renderWellnessProjection(scoreReport);
-          DashboardManager.renderAssessmentTrendAnalysis(scoreReport);
-          DashboardManager.renderTrendChart(scoreReport);
-          console.log('✅ Dashboard loaded from local storage');
-        } else {
-          DashboardManager.showNoDataView();
-        }
-      } catch (nestedError) {
-        const container = document.getElementById('scoreInsights');
+      if (typeof NeuroUtils !== 'undefined') {
+        NeuroUtils.showUIError(
+          'Something went wrong loading your dashboard. Please refresh the page or <a href="assessment.html" style="color:#a78bfa;">retake the assessment</a>.',
+          'dashboardContainer',
+          { type: 'error' }
+        );
+      } else {
+        const container = document.getElementById('dashboardContainer');
         if (container) {
-          container.innerHTML = '<div style="color:red; background:rgba(255,0,0,0.1); padding:10px; border-radius:8px;">' + 
-            '<strong>Dashboard Crash:</strong> ' + nestedError.message + 
-            '<br><small>' + nestedError.stack + '</small></div>';
+          container.innerHTML = `
+            <div style="text-align:center;padding:3rem;color:#f1f5f9;">
+              <div style="font-size:3rem;">⚠️</div>
+              <h3 style="margin:1rem 0;">Dashboard temporarily unavailable</h3>
+              <p>Please <a href="assessment.html" style="color:#a78bfa;">retake the assessment</a> or refresh the page.</p>
+            </div>`;
         }
-        console.error('Fatal crash:', nestedError);
       }
     }
   },
@@ -90,15 +112,19 @@ const DashboardManager = {
    * Render welcome section with user greeting
    */
   renderWelcomeSection: () => {
-    const user = AuthManager.getCurrentUser();
-    const header = document.querySelector('.page-header');
-    
-    if (header && user) {
-      const greeting = `Welcome, ${user.fullName}! 👋`;
-      header.innerHTML = `
-        <h1>${greeting}</h1>
-        <p>Track your wellness scores, trends, and burnout risk</p>
-      `;
+    try {
+      if (typeof AuthManager === 'undefined' || !AuthManager.getCurrentUser) return;
+      const user = AuthManager.getCurrentUser();
+      const header = document.querySelector('.page-header');
+      if (header && user && user.fullName) {
+        const greeting = `Welcome, ${user.fullName}! 👋`;
+        header.innerHTML = `
+          <h1>${greeting}</h1>
+          <p>Track your wellness scores, trends, and burnout risk</p>
+        `;
+      }
+    } catch (err) {
+      console.error('❌ renderWelcomeSection failed:', err);
     }
   },
 
@@ -246,16 +272,26 @@ const DashboardManager = {
    * Render wellness projection cards
    */
   renderWellnessProjection: () => {
-    const score = StorageManager.getWellnessScore()?.scores?.overall ?? 50;
-    const prediction = PredictionEngine.generatePrediction(score);
+    try {
+      let score = 50;
+      if (typeof StorageManager !== 'undefined' && StorageManager.isAvailable()) {
+        score = StorageManager.getWellnessScore()?.scores?.overall ?? 50;
+      }
 
-    const day7 = document.getElementById('day7');
-    const day14 = document.getElementById('day14');
-    const day30 = document.getElementById('day30');
+      const prediction = (typeof PredictionEngine !== 'undefined' && PredictionEngine.generatePrediction)
+        ? PredictionEngine.generatePrediction(score)
+        : { day7: Math.min(100, score + 3), day14: Math.min(100, score + 7), day30: Math.min(100, score + 12) };
 
-    if (day7) day7.textContent = `${prediction.day7}%`;
-    if (day14) day14.textContent = `${prediction.day14}%`;
-    if (day30) day30.textContent = `${prediction.day30}%`;
+      const day7  = document.getElementById('day7');
+      const day14 = document.getElementById('day14');
+      const day30 = document.getElementById('day30');
+
+      if (day7)  day7.textContent  = `${prediction.day7}%`;
+      if (day14) day14.textContent = `${prediction.day14}%`;
+      if (day30) day30.textContent = `${prediction.day30}%`;
+    } catch (err) {
+      console.error('❌ renderWellnessProjection failed:', err);
+    }
   },
 
   /**
@@ -1290,46 +1326,291 @@ const DashboardManager = {
     const container = document.getElementById('recommendationsContainer');
     if (!container) return;
 
-    const recs = RecommendationEngine.generateRecommendations();
-    if (recs.error) return;
+    try {
+      if (typeof SmartRecommendationEngine === 'undefined') return;
+      const scores = report && report.scores ? report.scores : null;
+      if (!scores) return;
 
-    let html = '<div class="grid grid-2">';
+      const recs = SmartRecommendationEngine.generateRecommendations(scores);
+      if (!recs) return;
 
-    // Get top recommendations from each priority
-    const topRecs = [];
-    Object.values(recs.recommendations).forEach(priorityRecs => {
-      topRecs.push(...priorityRecs.slice(0, 2));
-    });
+      const categories = [
+        { key: 'physical', label: 'Physical Health',    priority: 'MEDIUM' },
+        { key: 'mental',   label: 'Mental Health',      priority: 'HIGH'   },
+        { key: 'emotional', label: 'Emotional Wellness', priority: 'MEDIUM' }
+      ];
 
-    topRecs.slice(0, 4).forEach(rec => {
+      let html = '<div class="grid grid-2">';
+      categories.forEach(cat => {
+        const items = (recs[cat.key] || []).slice(0, 1);
+        items.forEach(item => {
+          html += `
+            <div class="recommendation-card" data-animate>
+              <div class="recommendation-header">
+                <div>
+                  <h4 class="recommendation-title">${cat.label}</h4>
+                  <span class="recommendation-priority ${cat.priority.toLowerCase()}">${cat.priority}</span>
+                </div>
+              </div>
+              <p style="margin-bottom: 1rem;">${item}</p>
+              <a href="recommendations.html" class="btn btn-sm btn-primary">View Details</a>
+            </div>`;
+        });
+      });
+      html += '</div>';
+      html += `<div style="text-align:center;margin-top:2rem;">
+        <a href="recommendations.html" class="btn btn-primary">View All Recommendations →</a>
+      </div>`;
+
+      container.innerHTML = html;
+    } catch (err) {
+      console.error('❌ renderRecommendations failed:', err);
+    }
+  },
+
+  /**
+   * Render intelligent insight cards: Main Problem · Focus Area · Alerts · Highlights
+   */
+  renderIntelligentInsights: (scoreReport) => {
+    const el = document.getElementById('intelligentInsightsSection');
+    if (!el || typeof InsightsEngine === 'undefined') return;
+
+    try {
+      const raw    = scoreReport?.scores || scoreReport?.categoryScores || {};
+      const data   = InsightsEngine.analyze(raw);
+      if (!data) return;
+
+      const { mainProblem: mp, focusArea: fa, alerts, highlights } = data;
+
+      const urgencyBadge = (tier) => {
+        const map = { CRITICAL:'#ef4444', HIGH:'#f97316', MEDIUM:'#f59e0b', LOW:'#10b981', EXCELLENT:'#6366f1' };
+        const c   = map[tier] || '#94a3b8';
+        return `<span style="background:${c}18;color:${c};border:1px solid ${c}33;padding:0.18rem 0.6rem;border-radius:99px;font-size:0.7rem;font-weight:700;">${tier}</span>`;
+      };
+
+      const chips = (areas) => (areas||[]).slice(0,3).map(a =>
+        `<span style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:99px;padding:0.15rem 0.55rem;font-size:0.72rem;color:rgba(226,232,240,0.55);">${a}</span>`
+      ).join('');
+
+      // Heading
+      let html = `
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+          <h2 class="section-heading" style="margin:0;">🧠 Intelligent Insights</h2>
+          <span style="font-size:0.75rem;color:rgba(226,232,240,0.4);">Personalised analysis based on your scores</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;">`;
+
+      // Main Problem — full width
       html += `
-        <div class="recommendation-card" data-animate>
-          <div class="recommendation-header">
+        <div class="card" data-animate style="border-left:4px solid ${mp.color};grid-column:1/-1;">
+          <div class="card-body">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">
+              <div style="display:flex;align-items:center;gap:0.75rem;">
+                <span style="font-size:2rem;line-height:1;">${mp.icon}</span>
+                <div>
+                  <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:rgba(226,232,240,0.4);margin-bottom:0.2rem;">Main Problem Area</div>
+                  <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:${mp.color};">${mp.headline}</h3>
+                </div>
+              </div>
+              <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                ${urgencyBadge(mp.urgency)}
+                <span style="font-size:1.4rem;font-weight:800;color:${mp.color};">${mp.score}%</span>
+              </div>
+            </div>
+            <p style="font-size:0.875rem;color:rgba(226,232,240,0.75);line-height:1.6;margin-bottom:0.75rem;">${mp.body}</p>
+            <div style="background:${mp.color}0D;border:1px solid ${mp.color}22;border-radius:10px;padding:0.65rem 0.9rem;font-size:0.82rem;color:rgba(226,232,240,0.8);margin-bottom:0.75rem;">
+              <strong>→ Action:</strong> ${mp.action}
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">${chips(mp.areas)}</div>
+          </div>
+        </div>`;
+
+      // Focus Area card
+      html += `
+        <div class="card" data-animate style="border-left:4px solid ${fa.color};">
+          <div class="card-body">
+            <div style="display:flex;align-items:center;gap:0.65rem;margin-bottom:0.65rem;">
+              <span style="font-size:1.5rem;line-height:1;">${fa.icon}</span>
+              <div>
+                <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:rgba(226,232,240,0.4);">This Week's Focus</div>
+                <h4 style="margin:0;font-size:0.95rem;font-weight:700;color:#f1f5f9;">${fa.headline}</h4>
+              </div>
+            </div>
+            <p style="font-size:0.84rem;color:rgba(226,232,240,0.7);line-height:1.55;margin-bottom:0.65rem;">${fa.body}</p>
+            <div style="font-size:0.8rem;color:${fa.color};font-weight:600;">→ ${fa.action}</div>
+            <div style="margin-top:0.75rem;display:flex;flex-wrap:wrap;gap:0.35rem;">${chips(fa.areas)}</div>
+          </div>
+        </div>`;
+
+      // Critical Alerts card
+      const alertsHtml = alerts.length > 0
+        ? alerts.map(a => `
+          <div style="background:${a.color}0D;border:1px solid ${a.color}25;border-radius:12px;padding:0.85rem 1rem;display:flex;gap:0.75rem;align-items:flex-start;">
+            <span style="font-size:1.3rem;flex-shrink:0;line-height:1.2;">${a.icon}</span>
             <div>
-              <h4 class="recommendation-title">${rec.title}</h4>
-              <span class="recommendation-priority ${rec.priority.toLowerCase()}">
-                ${rec.priority}
-              </span>
+              <div style="font-size:0.82rem;font-weight:700;color:${a.color};margin-bottom:0.25rem;">${a.title}</div>
+              <div style="font-size:0.79rem;color:rgba(226,232,240,0.65);line-height:1.45;">${a.message}</div>
+            </div>
+          </div>`).join('')
+        : `<div style="text-align:center;padding:1rem;color:rgba(226,232,240,0.35);font-size:0.85rem;">✅ No critical alerts — great work!</div>`;
+
+      html += `
+        <div class="card" data-animate style="border-left:4px solid #ef4444;">
+          <div class="card-body">
+            <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:rgba(226,232,240,0.4);margin-bottom:0.85rem;">🚨 Critical Alerts</div>
+            <div style="display:flex;flex-direction:column;gap:0.75rem;">${alertsHtml}</div>
+          </div>
+        </div>`;
+
+      html += '</div>';
+
+      // Positive Highlights — full width
+      if (highlights.length > 0) {
+        const hHtml = highlights.map(h => `
+          <div style="background:${h.color}0A;border:1px solid ${h.color}22;border-radius:14px;padding:1rem 1.1rem;display:flex;gap:0.75rem;align-items:flex-start;flex:1;min-width:220px;">
+            <span style="font-size:1.5rem;flex-shrink:0;line-height:1;">${h.icon}</span>
+            <div>
+              <div style="font-size:0.82rem;font-weight:700;color:${h.color};margin-bottom:0.25rem;">${h.title}</div>
+              <div style="font-size:0.79rem;color:rgba(226,232,240,0.65);line-height:1.45;">${h.message}</div>
+            </div>
+          </div>`).join('');
+
+        html += `
+          <div class="card" data-animate style="border-left:4px solid #10b981;">
+            <div class="card-body">
+              <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:rgba(226,232,240,0.4);margin-bottom:0.85rem;">✨ Positive Highlights</div>
+              <div style="display:flex;flex-wrap:wrap;gap:1rem;">${hHtml}</div>
+            </div>
+          </div>`;
+      }
+
+      // ── Causal Correlations section ──────────────────────────────────────
+      const correlations = data.correlations || [];
+      if (correlations.length > 0) {
+        const confColors = { 'Very High':'#ef4444', 'High':'#f97316', 'Moderate':'#f59e0b', 'Low':'#94a3b8' };
+
+        const corrCards = correlations.map(c => {
+          const confColor = confColors[c.confidence] || '#94a3b8';
+          const checkinHTML = c.checkinNote
+            ? `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:0.5rem 0.75rem;font-size:0.78rem;color:rgba(226,232,240,0.6);margin-top:0.5rem;font-style:italic;">
+                📊 ${c.checkinNote}
+              </div>` : '';
+
+          return `
+            <div class="card" data-animate style="border-left:4px solid ${c.color};">
+              <div class="card-body">
+                <!-- Header: cause → effect -->
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">
+                  <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+                    <span style="font-size:1.3rem;line-height:1;">${c.icon}</span>
+                    <div>
+                      <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:rgba(226,232,240,0.4);">Detected Relationship</div>
+                      <div style="font-size:0.9rem;font-weight:700;color:#f1f5f9;margin-top:0.15rem;">
+                        <span style="color:${c.color};">${c.cause}</span>
+                        <span style="color:rgba(226,232,240,0.4);margin:0 0.35rem;">→</span>
+                        <span>${c.effect}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.3rem;">
+                    <span style="background:${confColor}18;color:${confColor};border:1px solid ${confColor}33;padding:0.15rem 0.55rem;border-radius:99px;font-size:0.68rem;font-weight:700;white-space:nowrap;">${c.confidence} Confidence</span>
+                    <span style="font-size:0.65rem;color:rgba(226,232,240,0.3);">${c.dataSource}</span>
+                  </div>
+                </div>
+
+                <!-- Explanation -->
+                <p style="font-size:0.835rem;color:rgba(226,232,240,0.72);line-height:1.6;margin-bottom:0.65rem;">${c.explanation}</p>
+
+                <!-- Check-in data note -->
+                ${checkinHTML}
+
+                <!-- Fix -->
+                <div style="background:${c.color}0D;border:1px solid ${c.color}22;border-radius:10px;padding:0.6rem 0.9rem;font-size:0.81rem;color:rgba(226,232,240,0.8);margin-top:0.75rem;">
+                  <strong>→ Fix:</strong> ${c.fix}
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+
+        html += `
+          <div style="margin-top:1.5rem;">
+            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;">
+              <h3 style="margin:0;font-size:1rem;font-weight:700;color:#f1f5f9;">🔗 Cause-Effect Relationships</h3>
+              <span style="font-size:0.72rem;color:rgba(226,232,240,0.4);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:99px;padding:0.15rem 0.6rem;">${correlations.length} detected · Rule-based analysis</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.25rem;">
+              ${corrCards}
+            </div>
+          </div>`;
+      } else {
+        html += `
+          <div style="margin-top:1.5rem;padding:1.25rem;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.15);border-radius:14px;text-align:center;">
+            <span style="font-size:1.5rem;">✅</span>
+            <p style="font-size:0.875rem;color:rgba(226,232,240,0.6);margin-top:0.5rem;">No harmful cause-effect patterns detected. Your wellness dimensions are in healthy balance.</p>
+          </div>`;
+      }
+
+      el.innerHTML = html;
+
+    } catch (err) {
+      console.error('❌ renderIntelligentInsights failed:', err);
+    }
+  },
+
+  /**
+   * Render daily check-in status widget on the dashboard
+   */
+  renderCheckinWidget: () => {
+    const el = document.getElementById('dashboardCheckinBody');
+    if (!el || typeof CheckinManager === 'undefined') return;
+
+    try {
+      const MOODS = [
+        { val:1, emoji:'😞', label:'Very Low',  color:'#ef4444' },
+        { val:2, emoji:'😕', label:'Low',       color:'#f97316' },
+        { val:3, emoji:'😐', label:'Neutral',   color:'#f59e0b' },
+        { val:4, emoji:'🙂', label:'Good',      color:'#10b981' },
+        { val:5, emoji:'😄', label:'Excellent', color:'#6366f1' }
+      ];
+
+      const today   = CheckinManager.getTodayCheckin();
+      const { insights, weekAvg } = CheckinManager.getInsights();
+
+      if (today) {
+        const mood = MOODS[today.mood - 1] || MOODS[2];
+        el.innerHTML = `
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:1.5rem;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;">
+            <div style="text-align:center;">
+              <div style="font-size:2.5rem;line-height:1;">${mood.emoji}</div>
+              <div style="font-size:0.7rem;color:${mood.color};font-weight:700;margin-top:0.25rem;">${mood.label}</div>
+            </div>
+            <div>
+              <div style="font-size:0.78rem;color:rgba(226,232,240,0.5);margin-bottom:0.5rem;">Today's log · ${today.dateLabel}</div>
+              <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                <span style="background:rgba(255,255,255,0.06);border-radius:8px;padding:0.25rem 0.6rem;font-size:0.8rem;color:rgba(226,232,240,0.75);">🌙 Sleep ${today.sleep}/10</span>
+                <span style="background:rgba(255,255,255,0.06);border-radius:8px;padding:0.25rem 0.6rem;font-size:0.8rem;color:rgba(226,232,240,0.75);">⚡ Energy ${today.energy}/10</span>
+              </div>
+              ${today.notes ? `<p style="margin-top:0.6rem;font-size:0.8rem;color:rgba(226,232,240,0.5);font-style:italic;">"${today.notes.slice(0,80)}${today.notes.length>80?'…':''}"</p>` : ''}
             </div>
           </div>
-          <p style="margin-bottom: 1rem;">${rec.recommendations[0]}</p>
-          <a href="recommendations.html" class="btn btn-sm btn-primary">
-            View Details
-          </a>
-        </div>
-      `;
-    });
-
-    html += '</div>';
-    html += `
-      <div style="text-align: center; margin-top: 2rem;">
-        <a href="recommendations.html" class="btn btn-primary">
-          View All Recommendations →
-        </a>
-      </div>
-    `;
-
-    container.innerHTML = html;
+          ${weekAvg ? `
+          <div style="font-size:0.78rem;color:rgba(226,232,240,0.5);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">This Week's Insight</div>
+          <div style="font-size:0.875rem;color:rgba(226,232,240,0.75);background:rgba(255,255,255,0.04);border-radius:10px;padding:0.75rem 1rem;border-left:3px solid #10b981;">
+            ${insights[0] || ''}
+          </div>` : ''}`;
+      } else {
+        el.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+            <div>
+              <p style="font-size:0.95rem;font-weight:600;color:#f1f5f9;margin-bottom:0.3rem;">You haven't logged today yet</p>
+              <p style="font-size:0.835rem;color:rgba(226,232,240,0.55);">Daily check-ins take 30 seconds and reveal weekly trends.</p>
+            </div>
+            <a href="checkin.html" class="btn btn-primary" style="white-space:nowrap;">📝 Log Now</a>
+          </div>`;
+      }
+    } catch (err) {
+      console.error('❌ renderCheckinWidget failed:', err);
+    }
   }
 };
 

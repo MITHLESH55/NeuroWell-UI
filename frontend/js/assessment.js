@@ -296,6 +296,18 @@ const AssessmentManager = {
         StorageManager.saveLastAssessmentDate();
         StorageManager.saveHistoricalData(scores);
 
+        // Submit to Backend (MongoDB)
+        const user = AuthManager.getCurrentUser();
+        const userId = user ? user.email : 'anonymous';
+        
+        APIService.submitAssessment(AssessmentManager.responses, userId)
+          .then(result => {
+            console.log('✅ Data synced to MongoDB:', result);
+          })
+          .catch(err => {
+            console.warn('⚠️ MongoDB sync failed, but local data saved:', err);
+          });
+
         AppManager.hideLoader();
         AppManager.showNotification('✅ Assessment completed successfully!', 'success');
 
@@ -304,7 +316,7 @@ const AssessmentManager = {
         // Redirect to dashboard
         setTimeout(() => {
           window.location.href = 'dashboard.html';
-        }, 500);
+        }, 800);
 
       } catch (error) {
         AppManager.hideLoader();

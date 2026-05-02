@@ -35,13 +35,15 @@ const CONSTANTS = {
   },
 
   // Storage Keys
-  STORAGE: {
-    ASSESSMENT_RESPONSES: 'neurowell_assessment_responses',
-    WELLNESS_SCORE: 'neurowell_wellness_score',
-    LAST_ASSESSMENT_DATE: 'neurowell_last_assessment_date',
-    HISTORICAL_DATA: 'neurowell_historical_data',
-    GOALS: 'neurowell_goals'
-  },
+    STORAGE: {
+      ASSESSMENT_RESPONSES: 'neurowell_assessment_responses',
+      WELLNESS_SCORE: 'neurowell_wellness_score',
+      LAST_ASSESSMENT_DATE: 'neurowell_last_assessment_date',
+      HISTORICAL_DATA: 'neurowell_historical_data',
+      GOALS: 'neurowell_goals',
+      USERS: 'neurowell_users',
+      SESSION: 'neurowell_session'
+    },
 
   // Goal Definitions
   GOALS: {

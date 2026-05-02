@@ -1,0 +1,746 @@
+/**
+ * NEUROWELL - Core Intelligence Module Styles
+ * Scoped to intelligence-module/ dashboard page
+ */
+
+/* ── Imports & Base ───────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --cim-bg:           #0a0f1e;
+  --cim-surface:      #0f172a;
+  --cim-card:         rgba(255,255,255,0.04);
+  --cim-card-hover:   rgba(255,255,255,0.07);
+  --cim-border:       rgba(255,255,255,0.07);
+  --cim-border-glow:  rgba(139,92,246,0.25);
+  --cim-primary:      #8b5cf6;
+  --cim-primary-glow: rgba(139,92,246,0.3);
+  --cim-blue:         #3b82f6;
+  --cim-cyan:         #06b6d4;
+  --cim-green:        #10b981;
+  --cim-amber:        #f59e0b;
+  --cim-orange:       #f97316;
+  --cim-red:          #ef4444;
+  --cim-pink:         #f43f5e;
+  --cim-text:         #f1f5f9;
+  --cim-text-2:       rgba(226,232,240,0.78);
+  --cim-text-3:       rgba(148,163,184,0.65);
+  --cim-grad-1:       linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --cim-grad-2:       linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --cim-grad-3:       linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --cim-grad-risk-critical: linear-gradient(135deg, #ef4444, #dc2626);
+  --cim-grad-risk-high:     linear-gradient(135deg, #f97316, #ea580c);
+  --cim-grad-risk-moderate: linear-gradient(135deg, #f59e0b, #d97706);
+  --cim-grad-risk-low:      linear-gradient(135deg, #10b981, #059669);
+  --cim-grad-risk-none:     linear-gradient(135deg, #6366f1, #4f46e5);
+  --cim-radius:       20px;
+  --cim-radius-sm:    12px;
+  --cim-shadow:       0 8px 32px rgba(0,0,0,0.4);
+  --cim-shadow-glow:  0 0 40px rgba(139,92,246,0.15);
+}
+
+/* ── Reset & Base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body.cim-page {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--cim-bg);
+  color: var(--cim-text);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Layout ───────────────────────────────────────────────────────── */
+.cim-shell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem 5rem;
+}
+
+/* ── Hero Banner ──────────────────────────────────────────────────── */
+.cim-hero {
+  position: relative;
+  padding: 3.5rem 1.5rem 2rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+.cim-hero::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.cim-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1.1rem;
+  border-radius: 999px;
+  background: rgba(139,92,246,0.12);
+  border: 1px solid rgba(139,92,246,0.25);
+  color: #c4b5fd;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+  animation: fadeInDown 0.6s ease-out both;
+}
+
+.cim-hero__title {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  margin-bottom: 0.75rem;
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+}
+
+.cim-hero__title .accent {
+  background: var(--cim-grad-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cim-hero__sub {
+  color: var(--cim-text-3);
+  font-size: 1rem;
+  max-width: 520px;
+  margin: 0 auto 2rem;
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+/* ── Input Form ───────────────────────────────────────────────────── */
+.cim-form-card {
+  background: var(--cim-card);
+  border: 1px solid var(--cim-border);
+  border-radius: var(--cim-radius);
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(12px);
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+  transition: border-color 0.3s;
+}
+
+.cim-form-card:hover { border-color: var(--cim-border-glow); }
+
+.cim-form-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cim-form-desc {
+  color: var(--cim-text-3);
+  font-size: 0.875rem;
+  margin-bottom: 2rem;
+}
+
+.cim-input-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.cim-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cim-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cim-text-2);
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cim-label span.emoji { font-size: 1rem; }
+
+.cim-range-wrap {
+  position: relative;
+}
+
+.cim-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.1);
+  outline: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cim-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--cim-primary);
+  border: 3px solid var(--cim-bg);
+  box-shadow: 0 0 0 3px var(--cim-primary-glow);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.cim-range::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 6px var(--cim-primary-glow);
+}
+
+.cim-range-value {
+  position: absolute;
+  right: 0;
+  top: -28px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #c4b5fd;
+  min-width: 36px;
+  text-align: right;
+}
+
+.cim-range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--cim-text-3);
+  margin-top: 0.35rem;
+}
+
+.cim-run-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: none;
+  border-radius: var(--cim-radius-sm);
+  cursor: pointer;
+  background: var(--cim-grad-1);
+  color: #fff;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 20px rgba(102,126,234,0.35);
+}
+
+.cim-run-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(102,126,234,0.5);
+}
+
+.cim-run-btn:active { transform: translateY(0); }
+
+.cim-run-btn .btn-icon { font-size: 1.2rem; }
+
+/* ── Dashboard Grid ───────────────────────────────────────────────── */
+.cim-dashboard { display: none; }
+.cim-dashboard.visible { display: block; animation: fadeInUp 0.5s ease-out both; }
+
+.cim-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.cim-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.cim-grid-main {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ── Card Base ────────────────────────────────────────────────────── */
+.cim-card {
+  background: var(--cim-card);
+  border: 1px solid var(--cim-border);
+  border-radius: var(--cim-radius);
+  padding: 1.75rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+.cim-card:hover {
+  border-color: var(--cim-border-glow);
+  transform: translateY(-3px);
+  box-shadow: var(--cim-shadow-glow);
+}
+
+.cim-card__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cim-text-3);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cim-card__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--cim-text);
+  margin-bottom: 0.5rem;
+}
+
+/* ── Wellness Score Card ───────────────────────────────────────────── */
+.cim-score-card {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.cim-score-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -20%;
+  width: 140%;
+  height: 140%;
+  background: radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.cim-score-big {
+  font-size: 4.5rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  background: var(--cim-grad-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.25rem;
+}
+
+.cim-score-status {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--cim-text-2);
+  margin-bottom: 0.5rem;
+}
+
+.cim-score-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 99px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* ── Score Ring ───────────────────────────────────────────────────── */
+.cim-ring-wrap {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 1rem auto;
+}
+
+.cim-ring-svg { transform: rotate(-90deg); }
+
+.cim-ring-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 10; }
+
+.cim-ring-progress {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke: url(#cimGrad);
+  transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cim-ring-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.cim-ring-number {
+  font-size: 1.85rem;
+  font-weight: 900;
+  line-height: 1;
+  background: var(--cim-grad-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cim-ring-unit { font-size: 0.7rem; color: var(--cim-text-3); margin-top: 2px; }
+
+/* ── Category Scores ─────────────────────────────────────────────── */
+.cim-cat-list { display: flex; flex-direction: column; gap: 1rem; }
+
+.cim-cat-item {}
+
+.cim-cat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.cim-cat-name { color: var(--cim-text-2); }
+.cim-cat-val  { font-weight: 700; }
+
+.cim-progress-track {
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.cim-progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 0;
+}
+
+/* ── Risk Card ───────────────────────────────────────────────────── */
+.cim-risk-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.cim-risk-level {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 0.4rem;
+}
+
+.cim-risk-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1rem;
+  opacity: 0.75;
+}
+
+.cim-risk-bar-wrap {
+  height: 8px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.cim-risk-bar {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 1s ease;
+}
+
+.cim-risk-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--cim-radius-sm);
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  border: 1px solid transparent;
+}
+
+.cim-risk-item--CRITICAL {
+  background: rgba(239,68,68,0.1);
+  border-color: rgba(239,68,68,0.2);
+}
+.cim-risk-item--HIGH {
+  background: rgba(249,115,22,0.1);
+  border-color: rgba(249,115,22,0.2);
+}
+.cim-risk-item--MODERATE {
+  background: rgba(245,158,11,0.1);
+  border-color: rgba(245,158,11,0.2);
+}
+.cim-risk-item--LOW {
+  background: rgba(16,185,129,0.08);
+  border-color: rgba(16,185,129,0.15);
+}
+
+.cim-risk-item__icon { font-size: 1.1rem; flex-shrink: 0; padding-top: 2px; }
+
+.cim-risk-item__body {}
+
+.cim-risk-item__title {
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.cim-risk-item__msg { color: var(--cim-text-2); }
+
+.cim-risk-item__advice {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #c4b5fd;
+  font-style: italic;
+}
+
+/* ── Insights Panel ──────────────────────────────────────────────── */
+.cim-insights-list { display: flex; flex-direction: column; gap: 0.85rem; }
+
+.cim-insight-item {
+  display: flex;
+  gap: 0.9rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--cim-radius-sm);
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.cim-insight-item:hover { transform: translateX(3px); }
+
+.cim-insight-item--warning {
+  background: rgba(249,115,22,0.08);
+  border-color: rgba(249,115,22,0.18);
+}
+.cim-insight-item--info {
+  background: rgba(59,130,246,0.08);
+  border-color: rgba(59,130,246,0.18);
+}
+.cim-insight-item--success {
+  background: rgba(16,185,129,0.08);
+  border-color: rgba(16,185,129,0.18);
+}
+
+.cim-insight-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+
+.cim-insight-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.cim-insight-msg {
+  font-size: 0.82rem;
+  color: var(--cim-text-2);
+  line-height: 1.5;
+}
+
+/* ── Chart Container ─────────────────────────────────────────────── */
+.cim-chart-wrap {
+  position: relative;
+  height: 260px;
+  width: 100%;
+}
+
+.cim-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--cim-text);
+}
+
+/* ── Projection Cards ─────────────────────────────────────────────── */
+.cim-proj-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
+}
+
+.cim-proj-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--cim-border);
+  border-radius: var(--cim-radius-sm);
+  padding: 1.25rem;
+  text-align: center;
+  transition: all 0.25s;
+}
+
+.cim-proj-card:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: var(--cim-border-glow);
+}
+
+.cim-proj-val {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.cim-proj-lbl {
+  font-size: 0.78rem;
+  color: var(--cim-text-3);
+  margin-top: 0.35rem;
+}
+
+/* ── Metric Summary Chips ─────────────────────────────────────────── */
+.cim-metric-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.cim-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--cim-border);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cim-text-2);
+}
+
+.cim-chip__label { color: var(--cim-text-3); font-weight: 400; }
+
+/* ── History Stats Row ────────────────────────────────────────────── */
+.cim-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.cim-stat-mini {
+  background: var(--cim-card);
+  border: 1px solid var(--cim-border);
+  border-radius: var(--cim-radius-sm);
+  padding: 1.1rem 1.25rem;
+  text-align: center;
+  transition: all 0.25s;
+}
+
+.cim-stat-mini:hover { border-color: var(--cim-border-glow); }
+
+.cim-stat-mini__val {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #c4b5fd;
+  margin-bottom: 0.2rem;
+}
+
+.cim-stat-mini__lbl {
+  font-size: 0.75rem;
+  color: var(--cim-text-3);
+  font-weight: 500;
+}
+
+/* ── Empty State ─────────────────────────────────────────────────── */
+.cim-empty {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--cim-text-3);
+}
+
+.cim-empty__icon { font-size: 3rem; margin-bottom: 1rem; }
+.cim-empty__msg  { font-size: 0.9rem; line-height: 1.6; }
+
+/* ── Demo Banner ─────────────────────────────────────────────────── */
+.cim-demo-bar {
+  background: linear-gradient(90deg, #f59e0b, #ef4444, #a855f7);
+  background-size: 200%;
+  animation: cimBannerAnim 4s linear infinite;
+  padding: 0.65rem 3rem 0.65rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+}
+
+@keyframes cimBannerAnim {
+  0%   { background-position: 0%; }
+  100% { background-position: 200%; }
+}
+
+/* ── Animations ──────────────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+.cim-loading { animation: pulse 1.4s ease-in-out infinite; }
+
+/* ── Back link ───────────────────────────────────────────────────── */
+.cim-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--cim-text-3);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+  transition: color 0.2s;
+}
+
+.cim-back:hover { color: #c4b5fd; }
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .cim-grid-3  { grid-template-columns: 1fr; }
+  .cim-grid-2  { grid-template-columns: 1fr; }
+  .cim-grid-main { grid-template-columns: 1fr; }
+  .cim-stats-row { grid-template-columns: repeat(2, 1fr); }
+  .cim-proj-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .cim-stats-row { grid-template-columns: 1fr 1fr; }
+  .cim-form-card { padding: 1.5rem; }
+  .cim-card      { padding: 1.25rem; }
+}

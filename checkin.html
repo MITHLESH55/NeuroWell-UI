@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Check-in - NeuroWell</title>
+  <meta name="description" content="Log your daily mood, sleep, and energy for personalised wellness trend insights.">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <style>
+    body { background:linear-gradient(180deg,#0f172a 0%,#020617 100%); min-height:100vh; }
+
+    /* ── Hero ── */
+    .ci-hero { position:relative; padding:3rem 1.5rem 1.5rem; text-align:center; overflow:hidden; }
+    .ci-hero::before {
+      content:''; position:absolute; top:-40%; left:50%; transform:translateX(-50%);
+      width:700px; height:700px;
+      background:radial-gradient(circle,rgba(245,158,11,0.08) 0%,transparent 70%);
+      border-radius:50%; z-index:0;
+    }
+    .ci-hero__content { position:relative; z-index:1; animation:fadeInUp 0.7s ease-out both; }
+    .ci-badge {
+      display:inline-flex; align-items:center; gap:0.5rem; padding:0.4rem 1rem;
+      border-radius:999px; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25);
+      color:#f59e0b; font-size:0.78rem; font-weight:600; letter-spacing:0.06em;
+      text-transform:uppercase; margin-bottom:1rem;
+    }
+    .ci-hero h1 { font-size:clamp(2rem,4vw,2.6rem); font-weight:800; letter-spacing:-0.03em; color:#fff; margin-bottom:0.5rem; }
+    .ci-hero p  { color:var(--text-tertiary); max-width:480px; margin:0 auto; }
+
+    /* ── Layout ── */
+    .ci-wrapper { max-width:820px; margin:0 auto; padding:1rem 1.5rem 5rem; }
+    .ci-grid    { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+
+    /* ── Today's form card ── */
+    .form-card {
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);
+      border-radius:20px; padding:1.75rem; backdrop-filter:blur(12px);
+    }
+    .form-card h3 { font-size:1.1rem; font-weight:700; color:#f1f5f9; margin-bottom:1.5rem; }
+
+    /* ── Mood picker ── */
+    .mood-row { display:flex; justify-content:space-between; gap:0.5rem; margin-bottom:1.5rem; }
+    .mood-btn {
+      flex:1; aspect-ratio:1; border-radius:14px; border:2px solid rgba(255,255,255,0.1);
+      background:rgba(255,255,255,0.04); font-size:1.6rem; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; flex-direction:column;
+      gap:0.2rem; transition:all 0.2s; color:rgba(226,232,240,0.5);
+    }
+    .mood-btn small { font-size:0.6rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
+    .mood-btn:hover { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.2); transform:translateY(-2px); }
+    .mood-btn.selected { border-color:var(--sel-color,#f59e0b); background:var(--sel-bg,rgba(245,158,11,0.12)); color:#f1f5f9; transform:translateY(-3px); box-shadow:0 4px 16px var(--sel-color,#f59e0b)33; }
+
+    /* ── Sliders ── */
+    .field { margin-bottom:1.25rem; }
+    .field-label { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
+    .field-label span:first-child { font-size:0.875rem; color:rgba(226,232,240,0.75); font-weight:600; }
+    .field-val { font-size:1rem; font-weight:800; }
+
+    input[type=range] {
+      -webkit-appearance:none; width:100%; height:6px; border-radius:99px;
+      outline:none; cursor:pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+      border:2px solid #0f172a; cursor:pointer; transition:transform 0.15s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
+
+    .range-sleep  { background:linear-gradient(90deg,#ef4444,#f59e0b,#10b981); }
+    .range-sleep::-webkit-slider-thumb  { background:#667eea; }
+    .range-energy { background:linear-gradient(90deg,#ef4444,#f59e0b,#10b981); }
+    .range-energy::-webkit-slider-thumb { background:#f59e0b; }
+
+    /* ── Notes ── */
+    textarea.ci-notes {
+      width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
+      border-radius:12px; padding:0.75rem 1rem; font-size:0.875rem; color:#f1f5f9;
+      resize:vertical; min-height:70px; font-family:inherit; outline:none;
+      transition:border-color 0.2s;
+    }
+    textarea.ci-notes:focus { border-color:rgba(245,158,11,0.4); }
+    textarea.ci-notes::placeholder { color:rgba(226,232,240,0.3); }
+
+    /* ── Submit ── */
+    .btn-submit {
+      width:100%; margin-top:1.25rem; padding:0.875rem; border-radius:12px;
+      background:linear-gradient(135deg,#f59e0b,#ef4444); color:#fff;
+      font-weight:700; font-size:1rem; border:none; cursor:pointer;
+      transition:opacity 0.2s, transform 0.2s;
+    }
+    .btn-submit:hover { opacity:0.9; transform:translateY(-1px); }
+    .btn-submit:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+    /* ── Done state ── */
+    .done-state { text-align:center; padding:2rem; }
+    .done-state .done-icon { font-size:3.5rem; margin-bottom:1rem; }
+    .done-state h4 { font-size:1.2rem; font-weight:700; color:#f1f5f9; margin-bottom:0.5rem; }
+    .done-state p  { color:rgba(226,232,240,0.65); font-size:0.875rem; }
+
+    /* ── Insights card ── */
+    .insights-card {
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);
+      border-radius:20px; padding:1.75rem;
+    }
+    .insights-card h3 { font-size:1.1rem; font-weight:700; color:#f1f5f9; margin-bottom:1.25rem; }
+
+    .insight-item {
+      display:flex; gap:0.75rem; align-items:flex-start;
+      padding:0.75rem 0; border-bottom:1px solid rgba(255,255,255,0.06);
+      font-size:0.875rem; color:rgba(226,232,240,0.75); line-height:1.5;
+    }
+    .insight-item:last-child { border-bottom:none; }
+    .insight-dot { width:8px; height:8px; border-radius:50%; background:#10b981; flex-shrink:0; margin-top:6px; }
+
+    /* ── Avg pills ── */
+    .avg-row { display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; margin-bottom:1.25rem; }
+    .avg-pill { background:rgba(255,255,255,0.04); border-radius:12px; padding:0.75rem; text-align:center; }
+    .avg-val  { font-size:1.5rem; font-weight:800; }
+    .avg-lbl  { font-size:0.68rem; color:rgba(226,232,240,0.5); margin-top:0.2rem; text-transform:uppercase; letter-spacing:0.05em; }
+
+    /* ── Chart ── */
+    .chart-wrap { height:180px; margin-top:1.25rem; }
+
+    /* ── Log list ── */
+    .log-item {
+      display:grid; grid-template-columns:auto 1fr auto; gap:0.75rem; align-items:center;
+      padding:0.6rem 0; border-bottom:1px solid rgba(255,255,255,0.05);
+      font-size:0.82rem;
+    }
+    .log-item:last-child { border-bottom:none; }
+    .log-date   { color:rgba(226,232,240,0.5); font-size:0.75rem; white-space:nowrap; }
+    .log-emojis { display:flex; gap:0.35rem; font-size:0.9rem; }
+    .log-scores { display:flex; gap:0.5rem; }
+    .log-score-chip { background:rgba(255,255,255,0.06); border-radius:6px; padding:0.1rem 0.45rem; font-size:0.72rem; color:rgba(226,232,240,0.6); }
+
+    @media(max-width:660px) { .ci-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body data-page="checkin">
+  <div id="navbar-container"></div>
+
+  <main>
+    <div class="ci-hero">
+      <div class="ci-hero__content">
+        <span class="ci-badge">📝 Daily Log</span>
+        <h1>Daily <span class="text-accent">Check-in</span></h1>
+        <p>Track your mood, sleep, and energy every day to reveal personalised wellness trends</p>
+      </div>
+    </div>
+
+    <div class="ci-wrapper">
+      <div class="ci-grid">
+
+        <!-- ── Form (left) ── -->
+        <div class="form-card">
+          <h3>📝 Today's Check-in</h3>
+          <div id="formArea"></div>
+        </div>
+
+        <!-- ── Insights (right) ── -->
+        <div>
+          <div class="insights-card" style="margin-bottom:1.5rem;">
+            <h3>📊 Weekly Averages</h3>
+            <div id="avgRow" class="avg-row"></div>
+            <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+          </div>
+
+          <div class="insights-card">
+            <h3>💡 Trend Insights</h3>
+            <div id="insightsList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent logs -->
+      <div class="form-card" style="margin-top:1.5rem;">
+        <h3>📅 Recent Logs <span style="color:rgba(226,232,240,0.4);font-size:0.8rem;font-weight:400;">(last 7 days)</span></h3>
+        <div id="logList"></div>
+      </div>
+
+      <!-- Nav -->
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:2rem;">
+        <a href="dashboard.html"      class="btn btn-secondary">📊 Dashboard</a>
+        <a href="achievements.html"   class="btn btn-secondary">🏆 Achievements</a>
+        <a href="goals.html"          class="btn btn-secondary">🎯 Goals</a>
+        <a href="recommendations.html"class="btn btn-primary">💡 Recommendations</a>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-container"></div>
+  <div id="loader-container"></div>
+
+  <script src="js/utils.js"></script>
+  <script src="data/constants.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/checkin.js"></script>
+  <script src="js/gamification.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    const MOODS = [
+      { val:1, emoji:'😞', label:'Very Low',  color:'#ef4444', bg:'rgba(239,68,68,0.12)'   },
+      { val:2, emoji:'😕', label:'Low',       color:'#f97316', bg:'rgba(249,115,22,0.12)'  },
+      { val:3, emoji:'😐', label:'Neutral',   color:'#f59e0b', bg:'rgba(245,158,11,0.12)'  },
+      { val:4, emoji:'🙂', label:'Good',      color:'#10b981', bg:'rgba(16,185,129,0.12)'  },
+      { val:5, emoji:'😄', label:'Excellent', color:'#6366f1', bg:'rgba(99,102,241,0.12)'  }
+    ];
+
+    let _selectedMood = null;
+    let _chart = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderForm();
+      renderInsights();
+      renderLogs();
+    });
+
+    // ── Form ──────────────────────────────────────────────────────────────
+    function renderForm() {
+      const el = document.getElementById('formArea');
+      if (!el) return;
+
+      const today = CheckinManager.getTodayCheckin();
+
+      if (today) {
+        _selectedMood = today.mood;
+        el.innerHTML = `
+          <div class="done-state">
+            <div class="done-icon">✅</div>
+            <h4>Check-in Complete!</h4>
+            <p>You've already logged today.<br>
+              Mood: ${MOODS[today.mood-1]?.emoji || ''} · Sleep: ${today.sleep}/10 · Energy: ${today.energy}/10
+            </p>
+            ${today.notes ? `<p style="margin-top:0.75rem;font-style:italic;color:rgba(226,232,240,0.5);">"${today.notes}"</p>` : ''}
+            <button class="btn btn-secondary" style="margin-top:1.25rem;width:100%;" onclick="renderFormFresh()">
+              ✏️ Edit Today's Entry
+            </button>
+          </div>`;
+        return;
+      }
+
+      renderFormFresh();
+    }
+
+    function renderFormFresh() {
+      _selectedMood = null;
+      const el = document.getElementById('formArea');
+      const today = CheckinManager.getTodayCheckin();
+      const pre = today || {};
+
+      el.innerHTML = `
+        <!-- Mood -->
+        <div style="margin-bottom:1.25rem;">
+          <p style="font-size:0.875rem;color:rgba(226,232,240,0.75);font-weight:600;margin-bottom:0.75rem;">How's your mood today?</p>
+          <div class="mood-row" id="moodRow">
+            ${MOODS.map(m => `
+              <button class="mood-btn ${_selectedMood===m.val?'selected':''}" id="mood-${m.val}"
+                style="--sel-color:${m.color};--sel-bg:${m.bg};"
+                onclick="selectMood(${m.val})">
+                <span>${m.emoji}</span><small>${m.label}</small>
+              </button>`).join('')}
+          </div>
+        </div>
+
+        <!-- Sleep -->
+        <div class="field">
+          <div class="field-label">
+            <span>🌙 Sleep Quality</span>
+            <span class="field-val" id="sleepVal" style="color:#667eea;">${pre.sleep||6}/10</span>
+          </div>
+          <input type="range" id="sleepRange" class="range-sleep" min="1" max="10"
+            value="${pre.sleep||6}" oninput="updateVal('sleepVal',this.value+'/10','#667eea')">
+        </div>
+
+        <!-- Energy -->
+        <div class="field">
+          <div class="field-label">
+            <span>⚡ Energy Level</span>
+            <span class="field-val" id="energyVal" style="color:#f59e0b;">${pre.energy||6}/10</span>
+          </div>
+          <input type="range" id="energyRange" class="range-energy" min="1" max="10"
+            value="${pre.energy||6}" oninput="updateVal('energyVal',this.value+'/10','#f59e0b')">
+        </div>
+
+        <!-- Notes -->
+        <div class="field">
+          <label style="font-size:0.875rem;color:rgba(226,232,240,0.75);font-weight:600;display:block;margin-bottom:0.5rem;">📓 Notes <span style="font-weight:400;color:rgba(226,232,240,0.4);">(optional)</span></label>
+          <textarea class="ci-notes" id="ciNotes" placeholder="How's your day going? Any stress, wins, or observations…" maxlength="300">${pre.notes||''}</textarea>
+        </div>
+
+        <button class="btn-submit" id="submitBtn" onclick="submitCheckin()">Save Today's Check-in</button>`;
+    }
+
+    function selectMood(val) {
+      _selectedMood = val;
+      MOODS.forEach(m => {
+        const btn = document.getElementById(`mood-${m.val}`);
+        if (!btn) return;
+        if (m.val === val) {
+          btn.classList.add('selected');
+          btn.style.setProperty('--sel-color', m.color);
+          btn.style.setProperty('--sel-bg', m.bg);
+        } else {
+          btn.classList.remove('selected');
+        }
+      });
+    }
+
+    function updateVal(id, text, color) {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = text; el.style.color = color; }
+    }
+
+    function submitCheckin() {
+      if (!_selectedMood) {
+        if (typeof NeuroUtils !== 'undefined') {
+          NeuroUtils.showToast('Please select a mood first 😊', 'warning', 2500);
+        }
+        return;
+      }
+
+      const sleep  = parseInt(document.getElementById('sleepRange')?.value  || '6');
+      const energy = parseInt(document.getElementById('energyRange')?.value || '6');
+      const notes  = document.getElementById('ciNotes')?.value || '';
+
+      const btn = document.getElementById('submitBtn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+      const entry = CheckinManager.saveCheckin({ mood: _selectedMood, sleep, energy, notes });
+
+      // Gamification feedback
+      if (typeof GamificationEngine !== 'undefined') {
+        try {
+          const result = GamificationEngine.getState();
+          const streak = result.streak || 0;
+          const pts    = result.points || 0;
+          const msg    = streak > 1
+            ? `Check-in saved! 🔥 ${streak}-day streak · ${pts} pts total`
+            : `Check-in saved! Great start! +10 pts earned 🎉`;
+          if (typeof NeuroUtils !== 'undefined') NeuroUtils.showToast(msg, 'success', 4000);
+
+          // Show new badge toast
+          const newBadges = result.earnedBadges || [];
+          const allBadges = GamificationEngine.getAllBadges();
+          const justEarned = allBadges.filter(b => newBadges.slice(-1).includes(b.id));
+          if (justEarned.length > 0 && typeof NeuroUtils !== 'undefined') {
+            setTimeout(() => NeuroUtils.showToast(`🏆 New badge unlocked: ${justEarned[0].emoji} ${justEarned[0].label}!`, 'info', 4500), 1200);
+          }
+        } catch(e) { console.warn('Gamification display error:', e); }
+      } else if (typeof NeuroUtils !== 'undefined') {
+        NeuroUtils.showToast('Check-in saved! 🎉', 'success', 3000);
+      }
+
+      // Re-render all sections
+      setTimeout(() => {
+        renderForm();
+        renderInsights();
+        renderLogs();
+      }, 400);
+    }
+
+    // ── Insights ──────────────────────────────────────────────────────────
+    function renderInsights() {
+      const { insights, weekAvg } = CheckinManager.getInsights();
+
+      // Avg pills
+      const avgEl = document.getElementById('avgRow');
+      if (avgEl && weekAvg) {
+        avgEl.innerHTML = `
+          <div class="avg-pill">
+            <div class="avg-val" style="color:#f59e0b;">${MOODS[(Math.round(weekAvg.mood)||3)-1]?.emoji || weekAvg.mood}</div>
+            <div class="avg-lbl">Mood avg</div>
+          </div>
+          <div class="avg-pill">
+            <div class="avg-val" style="color:#667eea;">${weekAvg.sleep}</div>
+            <div class="avg-lbl">Sleep /10</div>
+          </div>
+          <div class="avg-pill">
+            <div class="avg-val" style="color:#f59e0b;">${weekAvg.energy}</div>
+            <div class="avg-lbl">Energy /10</div>
+          </div>`;
+      } else if (avgEl) {
+        avgEl.innerHTML = `<p style="color:rgba(226,232,240,0.4);font-size:0.82rem;grid-column:1/-1;">Log your first check-in to see averages.</p>`;
+      }
+
+      // Insights list
+      const insEl = document.getElementById('insightsList');
+      if (insEl) {
+        insEl.innerHTML = insights.map(ins => `
+          <div class="insight-item">
+            <div class="insight-dot"></div>
+            <span>${ins}</span>
+          </div>`).join('');
+      }
+
+      // Trend chart
+      renderChart();
+    }
+
+    function renderChart() {
+      const canvas = document.getElementById('trendChart');
+      if (!canvas || typeof Chart === 'undefined') return;
+
+      const data = CheckinManager.getChartData(7);
+      if (data.labels.length === 0) { canvas.parentElement.style.display='none'; return; }
+
+      if (_chart) _chart.destroy();
+
+      _chart = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: data.labels,
+          datasets: [
+            { label:'Mood×2',    data: data.mood.map(v=>v*2),   borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.08)', tension:0.4, pointRadius:4, pointBackgroundColor:'#f59e0b', borderWidth:2, fill:true },
+            { label:'Sleep',     data: data.sleep,               borderColor:'#667eea', backgroundColor:'rgba(102,126,234,0.05)', tension:0.4, pointRadius:4, pointBackgroundColor:'#667eea', borderWidth:2 },
+            { label:'Energy',    data: data.energy,              borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.05)',  tension:0.4, pointRadius:4, pointBackgroundColor:'#10b981', borderWidth:2 }
+          ]
+        },
+        options: {
+          responsive:true, maintainAspectRatio:false,
+          animation:{ duration:700, easing:'easeInOutQuart' },
+          scales: {
+            y: { min:0, max:10, ticks:{ color:'#94a3b8', font:{size:11} }, grid:{ color:'rgba(148,163,184,0.08)', drawBorder:false } },
+            x: { ticks:{ color:'#94a3b8', font:{size:10} }, grid:{ display:false, drawBorder:false } }
+          },
+          plugins: {
+            legend:{ labels:{ color:'#cbd5e1', usePointStyle:true, padding:12, font:{size:11} } },
+            tooltip:{ backgroundColor:'rgba(15,23,42,0.95)', titleColor:'#f1f5f9', bodyColor:'#cbd5e1', borderColor:'#667eea', borderWidth:1, padding:10, displayColors:true }
+          }
+        }
+      });
+    }
+
+    // ── Recent logs ───────────────────────────────────────────────────────
+    function renderLogs() {
+      const el = document.getElementById('logList');
+      if (!el) return;
+
+      const logs = CheckinManager.getRecent(7);
+      if (logs.length === 0) {
+        el.innerHTML = '<p style="color:rgba(226,232,240,0.35);font-size:0.82rem;text-align:center;padding:1rem 0;">No entries yet — your first check-in will appear here.</p>';
+        return;
+      }
+
+      el.innerHTML = logs.map(log => {
+        const mood = MOODS[log.mood - 1] || MOODS[2];
+        return `
+          <div class="log-item">
+            <span class="log-date">${log.dateLabel}</span>
+            <span class="log-emojis">${mood.emoji} <span style="color:${mood.color};font-size:0.75rem;font-weight:600;">${mood.label}</span></span>
+            <div class="log-scores">
+              <span class="log-score-chip">🌙 ${log.sleep}/10</span>
+              <span class="log-score-chip">⚡ ${log.energy}/10</span>
+            </div>
+          </div>`;
+      }).join('');
+    }
+  </script>
+</body>
+</html>

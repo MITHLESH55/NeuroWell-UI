@@ -28,6 +28,11 @@
       <li><a href="recommendations.html" class="nav-link" data-page="recommendations">Recommendations</a></li>
     </ul>
 
+    <!-- Demo Mode Badge -->
+    <div class="navbar-demo-badge" id="demoBadge" style="display: none;">
+      📋 Demo Mode
+    </div>
+
     <div class="navbar-actions">
       <!-- Profile Section (shown when logged in) -->
       <div class="navbar-profile" id="navbarProfile" style="display: none;">
@@ -69,6 +74,25 @@
     const authSection = document.getElementById('navbarAuth');
     const profileName = document.getElementById('profileName');
     const profileEmail = document.getElementById('profileEmail');
+    const demoBadge = document.getElementById('demoBadge');
+
+    // Show demo badge if in demo mode
+    function updateDemoBadge() {
+      const demoMgrAvailable = typeof DemoManager !== 'undefined';
+      const isDemo = demoMgrAvailable && DemoManager.isDemo();
+      
+      if (isDemo && demoBadge) {
+        demoBadge.style.display = 'flex';
+      }
+    }
+
+    // Update demo badge on load - with retry for timing issues
+    updateDemoBadge();
+    
+    // Retry after a short delay to handle timing issues
+    setTimeout(() => {
+      updateDemoBadge();
+    }, 100);
 
     // Check login status and update profile display
     function updateProfileDisplay() {
@@ -117,10 +141,22 @@
     // Reset button functionality
     if (resetBtn) {
       resetBtn.addEventListener('click', () => {
-        if (confirm('Are you sure you want to reset your assessment? This will clear all saved data.')) {
+        const isDemo = typeof DemoManager !== 'undefined' && DemoManager.isDemo();
+        const message = isDemo ? 
+          'Exit demo mode and reset assessment?' : 
+          'Are you sure you want to reset your assessment? This will clear all saved data.';
+        
+        if (confirm(message)) {
           localStorage.removeItem(CONSTANTS.STORAGE.ASSESSMENT_RESPONSES);
           localStorage.removeItem(CONSTANTS.STORAGE.WELLNESS_SCORE);
           localStorage.removeItem(CONSTANTS.STORAGE.LAST_ASSESSMENT_DATE);
+          localStorage.removeItem(CONSTANTS.STORAGE.HISTORICAL_DATA);
+          
+          // Exit demo mode if active
+          if (isDemo && typeof DemoManager !== 'undefined') {
+            DemoManager.exitDemo();
+          }
+          
           window.location.href = 'assessment.html';
         }
       });

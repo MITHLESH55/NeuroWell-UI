@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Achievements - NeuroWell</title>
+  <meta name="description" content="Track your wellness streaks, points, and achievement badges on NeuroWell.">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body { background:linear-gradient(180deg,#0f172a 0%,#020617 100%); min-height:100vh; }
+
+    /* ── Hero ── */
+    .ach-hero { position:relative; padding:3rem 1.5rem 1.5rem; text-align:center; overflow:hidden; }
+    .ach-hero::before {
+      content:''; position:absolute; top:-40%; left:50%; transform:translateX(-50%);
+      width:700px; height:700px;
+      background:radial-gradient(circle,rgba(245,158,11,0.1) 0%,transparent 70%);
+      border-radius:50%; z-index:0;
+    }
+    .ach-hero__content { position:relative; z-index:1; animation:fadeInUp 0.7s ease-out both; }
+    .ach-badge-pill {
+      display:inline-flex; align-items:center; gap:0.5rem; padding:0.4rem 1rem;
+      border-radius:999px; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25);
+      color:#f59e0b; font-size:0.78rem; font-weight:600; letter-spacing:0.06em;
+      text-transform:uppercase; margin-bottom:1rem;
+    }
+    .ach-hero h1 { font-size:clamp(2rem,4vw,2.6rem); font-weight:800; letter-spacing:-0.03em; color:#fff; margin-bottom:0.5rem; }
+    .ach-hero p  { color:var(--text-tertiary); max-width:480px; margin:0 auto; }
+
+    /* ── Layout ── */
+    .ach-wrapper { max-width:900px; margin:0 auto; padding:1rem 1.5rem 5rem; }
+
+    /* ── Streak hero card ── */
+    .streak-card {
+      background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(239,68,68,0.08));
+      border:1px solid rgba(245,158,11,0.25); border-radius:20px;
+      padding:2rem; margin-bottom:1.5rem; position:relative; overflow:hidden;
+    }
+    .streak-card::after {
+      content:'🔥'; position:absolute; right:-1rem; top:-1.5rem;
+      font-size:8rem; opacity:0.08; pointer-events:none;
+    }
+    .streak-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; }
+    .streak-box  { text-align:center; }
+    .streak-num  { font-size:2.5rem; font-weight:900; line-height:1; }
+    .streak-lbl  { font-size:0.7rem; color:rgba(226,232,240,0.5); margin-top:0.25rem; text-transform:uppercase; letter-spacing:0.06em; }
+
+    /* ── Points bar ── */
+    .pts-bar-wrap { margin-top:1.5rem; }
+    .pts-bar-labels { display:flex; justify-content:space-between; font-size:0.78rem; color:rgba(226,232,240,0.55); margin-bottom:0.4rem; }
+    .pts-bar-track  { background:rgba(255,255,255,0.07); border-radius:99px; height:8px; overflow:hidden; }
+    .pts-bar-fill   { height:100%; border-radius:99px; background:linear-gradient(90deg,#f59e0b,#ef4444); transition:width 1s ease; }
+
+    /* ── Recent points log ── */
+    .log-card {
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+      border-radius:16px; padding:1.25rem; margin-bottom:1.5rem;
+    }
+    .log-card h3 { font-size:1rem; font-weight:700; color:#f1f5f9; margin-bottom:1rem; }
+    .log-row { display:flex; justify-content:space-between; align-items:center; padding:0.5rem 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:0.82rem; gap:0.5rem; }
+    .log-row:last-child { border-bottom:none; }
+    .log-pts { color:#f59e0b; font-weight:700; white-space:nowrap; }
+    .log-note { color:rgba(226,232,240,0.65); }
+    .log-date { color:rgba(226,232,240,0.35); font-size:0.72rem; white-space:nowrap; }
+
+    /* ── Category heading ── */
+    .cat-heading { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;
+      color:rgba(226,232,240,0.4); margin:2rem 0 1rem; display:flex; align-items:center; gap:0.75rem; }
+    .cat-heading::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.07); }
+
+    /* ── Badge grid ── */
+    .badge-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+
+    .badge-card {
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+      border-radius:16px; padding:1.25rem; text-align:center;
+      transition:transform 0.25s, border-color 0.25s, background 0.25s;
+      position:relative; overflow:hidden;
+    }
+    .badge-card.earned {
+      background:rgba(245,158,11,0.06); border-color:rgba(245,158,11,0.3);
+    }
+    .badge-card.earned:hover { transform:translateY(-4px); border-color:rgba(245,158,11,0.5); }
+    .badge-card.locked { filter:grayscale(0.8); opacity:0.45; }
+
+    .badge-emoji { font-size:2.5rem; line-height:1; margin-bottom:0.6rem; display:block; }
+    .badge-label { font-size:0.875rem; font-weight:700; color:#f1f5f9; margin-bottom:0.35rem; }
+    .badge-desc  { font-size:0.72rem; color:rgba(226,232,240,0.55); line-height:1.4; }
+    .badge-earned-tag {
+      position:absolute; top:0.5rem; right:0.5rem;
+      background:#f59e0b; color:#0f172a; font-size:0.62rem; font-weight:800;
+      padding:0.15rem 0.45rem; border-radius:99px;
+    }
+    .badge-lock { position:absolute; top:0.5rem; right:0.5rem; font-size:0.9rem; opacity:0.3; }
+
+    /* ── Shimmer on earned ── */
+    .badge-card.earned::before {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg,rgba(245,158,11,0.06),transparent);
+      pointer-events:none;
+    }
+
+    @media(max-width:560px) {
+      .streak-grid { grid-template-columns:repeat(2,1fr); }
+      .badge-grid  { grid-template-columns:repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body data-page="achievements">
+  <div id="navbar-container"></div>
+
+  <main>
+    <div class="ach-hero">
+      <div class="ach-hero__content">
+        <span class="ach-badge-pill">🏆 Achievements</span>
+        <h1>Your <span class="text-accent">Streaks & Badges</span></h1>
+        <p>Stay consistent, earn points, and unlock achievement badges</p>
+      </div>
+    </div>
+
+    <div class="ach-wrapper">
+      <!-- Streak & Points hero -->
+      <div id="streakCard" class="streak-card"></div>
+
+      <!-- Points log -->
+      <div class="log-card">
+        <h3>⚡ Recent Points Activity</h3>
+        <div id="pointsLog"></div>
+      </div>
+
+      <!-- Badges -->
+      <div id="badgesArea"></div>
+
+      <!-- Nav -->
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:2.5rem;">
+        <a href="checkin.html"  class="btn btn-primary">📝 Daily Check-in</a>
+        <a href="goals.html"    class="btn btn-secondary">🎯 Track Goals</a>
+        <a href="dashboard.html"class="btn btn-secondary">📊 Dashboard</a>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-container"></div>
+  <div id="loader-container"></div>
+
+  <script src="js/utils.js"></script>
+  <script src="data/constants.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/checkin.js"></script>
+  <script src="js/gamification.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    // Points milestones for progress bar
+    const PT_TIERS = [
+      { label:'Starter',   min:0,    max:50   },
+      { label:'Builder',   min:50,   max:200  },
+      { label:'Champion',  min:200,  max:500  },
+      { label:'Legend',    min:500,  max:1000 }
+    ];
+
+    document.addEventListener('DOMContentLoaded', renderAll);
+
+    function renderAll() {
+      const state  = GamificationEngine.getState();
+      const badges = GamificationEngine.getAllBadges();
+      renderStreak(state);
+      renderLog(state);
+      renderBadges(badges, state);
+    }
+
+    // ── Streak card ───────────────────────────────────────────────────────
+    function renderStreak(s) {
+      const el = document.getElementById('streakCard');
+      if (!el) return;
+
+      const tier   = PT_TIERS.find(t => s.points >= t.min && s.points < t.max) || PT_TIERS[PT_TIERS.length - 1];
+      const pct    = Math.min(100, Math.round(((s.points - tier.min) / (tier.max - tier.min)) * 100));
+      const streak = s.streak || 0;
+      const fire   = streak >= 7 ? '🔥' : streak >= 3 ? '🟠' : '⬜';
+
+      el.innerHTML = `
+        <div style="margin-bottom:1.5rem;">
+          <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;color:rgba(226,232,240,0.4);margin-bottom:0.5rem;">Your Wellness Progress</div>
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+            <div style="font-size:3.5rem;line-height:1;">${fire}</div>
+            <div>
+              <div style="font-size:2.5rem;font-weight:900;color:#f59e0b;line-height:1;">${streak} <span style="font-size:1.1rem;font-weight:600;color:rgba(226,232,240,0.6);">day streak</span></div>
+              <div style="font-size:0.82rem;color:rgba(226,232,240,0.5);margin-top:0.25rem;">
+                Longest: ${s.longestStreak || 0} days · Total check-ins: ${s.totalCheckins || 0}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="streak-grid">
+          <div class="streak-box">
+            <div class="streak-num" style="color:#f59e0b;">${s.points || 0}</div>
+            <div class="streak-lbl">Total Points</div>
+          </div>
+          <div class="streak-box">
+            <div class="streak-num" style="color:#10b981;">${(s.earnedBadges||[]).length}</div>
+            <div class="streak-lbl">Badges Earned</div>
+          </div>
+          <div class="streak-box">
+            <div class="streak-num" style="color:#6366f1;">${s.longestStreak || 0}</div>
+            <div class="streak-lbl">Best Streak</div>
+          </div>
+          <div class="streak-box">
+            <div class="streak-num" style="color:#3b82f6;">${s.totalCheckins || 0}</div>
+            <div class="streak-lbl">Check-ins</div>
+          </div>
+        </div>
+
+        <div class="pts-bar-wrap">
+          <div class="pts-bar-labels">
+            <span>${tier.label} Tier · ${s.points} pts</span>
+            <span>${tier.max} pts → ${PT_TIERS[PT_TIERS.indexOf(tier)+1]?.label || 'Max'}</span>
+          </div>
+          <div class="pts-bar-track">
+            <div class="pts-bar-fill" id="ptsBarFill" style="width:0%;"></div>
+          </div>
+        </div>`;
+
+      setTimeout(() => {
+        const fill = document.getElementById('ptsBarFill');
+        if (fill) fill.style.width = `${pct}%`;
+      }, 100);
+    }
+
+    // ── Points log ────────────────────────────────────────────────────────
+    function renderLog(s) {
+      const el = document.getElementById('pointsLog');
+      if (!el) return;
+      const log = (s.log || []).slice(0, 8);
+      if (log.length === 0) {
+        el.innerHTML = '<p style="color:rgba(226,232,240,0.35);font-size:0.82rem;">Complete a check-in to start earning points!</p>';
+        return;
+      }
+      el.innerHTML = log.map(l => `
+        <div class="log-row">
+          <span class="log-note">${l.action}</span>
+          <span class="log-pts">+${l.points} pts</span>
+          <span class="log-date">${l.date}</span>
+        </div>`).join('');
+    }
+
+    // ── Badges by category ────────────────────────────────────────────────
+    function renderBadges(badges) {
+      const el = document.getElementById('badgesArea');
+      if (!el) return;
+
+      const cats = ['Milestone', 'Streak', 'Points', 'Wellness'];
+      const catIcons = { Milestone:'🎯', Streak:'🔥', Points:'⭐', Wellness:'💚' };
+
+      let html = '';
+      cats.forEach(cat => {
+        const group = badges.filter(b => b.cat === cat);
+        if (!group.length) return;
+        html += `<div class="cat-heading">${catIcons[cat]||'•'} ${cat} Badges</div><div class="badge-grid">`;
+        group.forEach(b => {
+          html += `
+            <div class="badge-card ${b.earned ? 'earned' : 'locked'}"
+              title="${b.earned ? '✅ ' + b.label : '🔒 ' + b.desc}">
+              ${b.earned
+                ? '<span class="badge-earned-tag">✓</span>'
+                : '<span class="badge-lock">🔒</span>'}
+              <span class="badge-emoji">${b.emoji}</span>
+              <div class="badge-label">${b.label}</div>
+              <div class="badge-desc">${b.desc}</div>
+            </div>`;
+        });
+        html += '</div>';
+      });
+      el.innerHTML = html;
+    }
+  </script>
+</body>
+</html>

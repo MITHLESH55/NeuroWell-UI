@@ -207,38 +207,34 @@
     </div>
 
     <div class="recs-wrapper">
-      <!-- Recommendations Container -->
       <div id="recommendationsContainer">
-        <!-- Risk Insights -->
+        <!-- Hero insight / risk summary -->
         <section class="mb-lg">
           <div id="riskInsightsSection"></div>
         </section>
 
-        <!-- Personalized Recommendations -->
+        <!-- Quick wins -->
         <section class="mb-lg">
-          <h2 class="section-heading">Personalized Recommendations</h2>
+          <div id="quickWinsSection"></div>
+        </section>
+
+        <!-- Personalised recommendations (headings injected by JS) -->
+        <section class="mb-lg">
           <div id="personalizedRecsSection"></div>
         </section>
 
-        <!-- Expert Suggestions -->
+        <!-- Expert consultations (headings injected by JS) -->
         <section class="mb-lg">
-          <h2 class="section-heading">Consult Experts</h2>
           <div id="expertSuggestionsSection"></div>
         </section>
 
-        <!-- CTA Section -->
+        <!-- CTA -->
         <section class="cta-banner">
           <h3>Start Your Wellness Journey Today</h3>
-          <p>
-            Follow these recommendations consistently for 30 days to see significant improvements
-          </p>
+          <p>Follow these recommendations consistently for 30 days to see significant improvements.</p>
           <div class="btn-row">
-            <a href="dashboard.html" class="btn btn-secondary">
-              ← Back to Dashboard
-            </a>
-            <a href="assessment.html" class="btn btn-primary" style="background: white; color: #6d28d9;">
-              🔄 Retake Assessment
-            </a>
+            <a href="dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
+            <a href="assessment.html" class="btn btn-primary" style="background:white;color:#6d28d9;">🔄 Retake Assessment</a>
           </div>
         </section>
       </div>
@@ -252,6 +248,7 @@
   <div id="loader-container"></div>
 
   <!-- Scripts -->
+  <script src="js/utils.js"></script>
   <script src="data/constants.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/auth.js"></script>

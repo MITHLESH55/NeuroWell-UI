@@ -990,9 +990,13 @@ const DashboardManager = {
 
     // Get top recommendations from each priority
     const topRecs = [];
-    Object.values(recs.recommendations).forEach(priorityRecs => {
-      topRecs.push(...priorityRecs.slice(0, 2));
-    });
+    if (recs.recommendations) {
+      Object.values(recs.recommendations).forEach(priorityRecs => {
+        if (Array.isArray(priorityRecs)) {
+          topRecs.push(...priorityRecs.slice(0, 2));
+        }
+      });
+    }
 
     topRecs.slice(0, 4).forEach(rec => {
       html += `
@@ -1014,14 +1018,6 @@ const DashboardManager = {
     });
 
     html += '</div>';
-    html += `
-      <div style="text-align: center; margin-top: 2rem;">
-        <a href="recommendations.html" class="btn btn-primary">
-          View All Recommendations →
-        </a>
-      </div>
-    `;
-
     container.innerHTML = html;
   }
 };

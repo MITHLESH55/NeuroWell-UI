@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Personalization Engine — NeuroWell</title>
+  <meta name="description" content="NeuroWell's adaptive AI wellness coach: mood detection, goal adjustment, and personalized daily plans.">
+  <link rel="stylesheet" href="../css/personalization.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+<body class="pe-page">
+
+<div id="peDemoBanner" class="pe-demo-bar" style="display:none">
+  🎭 <strong>Demo Mode</strong> — showing sample data.
+  <a href="../assessment.html" style="color:#fff;text-decoration:underline;margin-left:6px">Take the real assessment →</a>
+</div>
+
+<div class="pe-wrap">
+
+  <!-- Hero -->
+  <div class="pe-hero">
+    <div class="pe-badge">🤖 AI Personalization Engine v1.0</div>
+    <h1 class="pe-title">Your <span class="grd">AI Wellness Coach</span></h1>
+    <p class="pe-sub">Adapts to your mood, adjusts your goals dynamically, and builds your perfect day — automatically.</p>
+  </div>
+
+  <a href="../dashboard.html" class="pe-back">← Back to Dashboard</a>
+
+  <!-- ── SECTION 1: Wellness Inputs ─────────────────────────────── -->
+  <div class="pe-card pe-mb pe-anim-0">
+    <div class="pe-card__label">⚙️ Today's Metrics — used by all three engines</div>
+    <div class="pe-input-row">
+      <div class="pe-field">
+        <label for="peSleep">😴 Sleep <span class="pe-range-val" id="sSleepVal">7.0h</span></label>
+        <input class="pe-range" type="range" id="peSleep" min="3" max="12" step="0.5" value="7">
+        <div class="pe-range-hints"><span>3h</span><span>12h</span></div>
+      </div>
+      <div class="pe-field">
+        <label for="peActivity">💪 Activity <span class="pe-range-val" id="sActVal">5/10</span></label>
+        <input class="pe-range" type="range" id="peActivity" min="1" max="10" step="1" value="5">
+        <div class="pe-range-hints"><span>Sedentary</span><span>Athlete</span></div>
+      </div>
+      <div class="pe-field">
+        <label for="peStress">😰 Stress <span class="pe-range-val" id="sStressVal">4/10</span></label>
+        <input class="pe-range" type="range" id="peStress" min="1" max="10" step="1" value="4">
+        <div class="pe-range-hints"><span>Calm</span><span>Critical</span></div>
+      </div>
+      <div class="pe-field">
+        <label for="peScreen">📱 Screen Time <span class="pe-range-val" id="sScreenVal">4h</span></label>
+        <input class="pe-range" type="range" id="peScreen" min="0" max="16" step="0.5" value="4">
+        <div class="pe-range-hints"><span>0h</span><span>16h</span></div>
+      </div>
+    </div>
+    <button class="pe-run-btn" id="peRunBtn" onclick="runPersonalizationEngine()">
+      🚀 Generate My Personalized Plan
+    </button>
+  </div>
+
+  <!-- ── SECTION 2: Mood Check-In ──────────────────────────────── -->
+  <div class="pe-card pe-mb pe-anim-1" id="moodSection">
+    <div class="pe-card__label">🎭 Emotional AI — Mood Check-In</div>
+    <p style="font-size:.82rem;color:var(--pe-text3);margin-bottom:1.1rem">Select an emoji or describe how you feel — the AI detects your emotional state.</p>
+
+    <!-- Quick emoji buttons -->
+    <div class="mood-emoji-row" id="moodEmojiRow">
+      <button class="mood-btn" data-emoji="😊" onclick="selectEmoji(this)"><span class="mood-emoji">😊</span>Happy</button>
+      <button class="mood-btn" data-emoji="😌" onclick="selectEmoji(this)"><span class="mood-emoji">😌</span>Calm</button>
+      <button class="mood-btn" data-emoji="😐" onclick="selectEmoji(this)"><span class="mood-emoji">😐</span>Neutral</button>
+      <button class="mood-btn" data-emoji="😕" onclick="selectEmoji(this)"><span class="mood-emoji">😕</span>Sad</button>
+      <button class="mood-btn" data-emoji="😞" onclick="selectEmoji(this)"><span class="mood-emoji">😞</span>Stressed</button>
+      <button class="mood-btn" data-emoji="😤" onclick="selectEmoji(this)"><span class="mood-emoji">😤</span>Frustrated</button>
+      <button class="mood-btn" data-emoji="😴" onclick="selectEmoji(this)"><span class="mood-emoji">😴</span>Tired</button>
+    </div>
+
+    <!-- Text input -->
+    <div class="mood-text-wrap">
+      <span class="mood-text-icon">✍️</span>
+      <input type="text" id="moodTextInput" placeholder="Or type how you feel... e.g. 'feeling anxious and tired'" maxlength="200">
+    </div>
+    <button class="mood-detect-btn" onclick="detectMoodFromText()">🧠 Detect Mood from Text</button>
+
+    <!-- Result -->
+    <div class="mood-result" id="moodResult"></div>
+
+    <!-- Mini mood history chart -->
+    <div style="margin-top:1.5rem">
+      <div class="pe-sec" style="font-size:.85rem;margin-bottom:.75rem">📈 7-Day Mood History</div>
+      <div class="pe-chart-wrap"><canvas id="moodHistoryChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 3: AI Coach — Goals ───────────────────────────── -->
+  <div class="pe-mb">
+    <div class="pe-sec">🎯 AI Coach — Adaptive Goals</div>
+    <div class="pe-g3" id="goalGrid">
+      <div class="pe-empty"><div class="pe-empty__icon">🎯</div><div class="pe-empty__msg">Run the engine above to activate your AI coach.</div></div>
+    </div>
+    <!-- Goal Log Modal (inline) -->
+    <div id="goalLogPanel" style="display:none" class="pe-card pe-mb" style="border-color:rgba(139,92,246,.3)">
+      <div class="pe-card__label">📝 Log Today's Progress — <span id="logGoalLabel"></span></div>
+      <div style="display:flex;gap:.75rem;align-items:center">
+        <input type="number" id="logActualInput" placeholder="Actual value" min="0"
+          style="flex:1;padding:.75rem 1rem;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--pe-border);color:var(--pe-text);font-size:.9rem;font-family:inherit;outline:none">
+        <button onclick="submitGoalLog()" style="padding:.75rem 1.5rem;border-radius:10px;background:var(--pe-grad);border:none;color:#fff;font-weight:700;cursor:pointer">Save</button>
+        <button onclick="closeGoalLog()" style="padding:.75rem;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--pe-border);color:var(--pe-text3);cursor:pointer">✕</button>
+      </div>
+      <div id="logResult" style="margin-top:1rem;font-size:.85rem;color:var(--pe-text2)"></div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 4: Daily Plan Timeline ────────────────────────── -->
+  <div class="pe-card pe-mb pe-anim-2">
+    <div class="pe-card__label">📅 Daily Life Automation — Your Personalized Plan</div>
+    <div id="dailyPlanContainer">
+      <div class="pe-empty">
+        <div class="pe-empty__icon">📅</div>
+        <div class="pe-empty__msg">Run the engine to generate your personalised daily plan.</div>
+      </div>
+    </div>
+    <div id="planStats" style="display:none;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--pe-border)">
+      <div class="pe-g3">
+        <div class="pe-stat"><div class="pe-stat__val" id="planTaskCount">0</div><div class="pe-stat__lbl">Tasks Today</div></div>
+        <div class="pe-stat"><div class="pe-stat__val" id="planDoneCount">0</div><div class="pe-stat__lbl">Completed</div></div>
+        <div class="pe-stat"><div class="pe-stat__val" id="planPctDone">0%</div><div class="pe-stat__lbl">Progress</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 5: Smart Quick Actions ────────────────────────── -->
+  <div class="pe-card pe-anim-3">
+    <div class="pe-card__label">⚡ Smart Suggestions — Quick Wins</div>
+    <div class="qa-grid" id="quickActionsGrid">
+      <button class="qa-btn"><span class="qa-btn__icon">💧</span>Drink a glass of water</button>
+      <button class="qa-btn"><span class="qa-btn__icon">🫁</span>Take 5 deep breaths</button>
+      <button class="qa-btn"><span class="qa-btn__icon">🚶</span>Stand up and move</button>
+      <button class="qa-btn"><span class="qa-btn__icon">👁️</span>20-20-20 eye rest</button>
+      <button class="qa-btn"><span class="qa-btn__icon">🙏</span>Name one gratitude</button>
+    </div>
+    <div id="qaFeedback" style="display:none;margin-top:1rem;padding:.75rem 1rem;border-radius:10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:#6ee7b7;font-size:.85rem"></div>
+  </div>
+
+</div><!-- /pe-wrap -->
+
+<!-- Scripts -->
+<script>
+// Stubs so modules load standalone
+window.CONSTANTS = window.CONSTANTS || {STORAGE:{},SCORE_RANGES:{},BURNOUT_RISK:{},ASSESSMENT:{TOTAL_QUESTIONS:30}};
+window.QUESTIONS  = window.QUESTIONS  || [];
+</script>
+<script src="../js/utils.js"></script>
+<script src="../data/constants.js"></script>
+<script src="../data/questions.js"></script>
+<script src="../js/storage.js"></script>
+<script src="../js/goalEngine.js"></script>
+<script src="../js/emotionAI.js"></script>
+<script src="../js/planGenerator.js"></script>
+
+<script>
+// ── State ───────────────────────────────────────────────────────────
+let currentMood       = null;
+let currentPlan       = [];
+let activeLogGoalType = null;
+let moodChart         = null;
+
+// ── Slider init ─────────────────────────────────────────────────────
+const sliderCfg = [
+  { id:'peSleep',    valId:'sSleepVal',   fmt: v => v+'h' },
+  { id:'peActivity', valId:'sActVal',     fmt: v => v+'/10' },
+  { id:'peStress',   valId:'sStressVal',  fmt: v => v+'/10' },
+  { id:'peScreen',   valId:'sScreenVal',  fmt: v => v+'h' },
+];
+sliderCfg.forEach(s => {
+  const el = document.getElementById(s.id);
+  const vl = document.getElementById(s.valId);
+  el.addEventListener('input', () => { vl.textContent = s.fmt(el.value); updateFill(el); });
+  updateFill(el);
+});
+function updateFill(el) {
+  const p = ((el.value - el.min) / (el.max - el.min)) * 100;
+  el.style.background = `linear-gradient(to right,#8b5cf6 ${p}%,rgba(255,255,255,.1) ${p}%)`;
+}
+function getMetrics() {
+  return {
+    sleep:      parseFloat(document.getElementById('peSleep').value),
+    activity:   parseInt(document.getElementById('peActivity').value),
+    stress:     parseInt(document.getElementById('peStress').value),
+    screenTime: parseFloat(document.getElementById('peScreen').value)
+  };
+}
+
+// ── Emoji mood selection ────────────────────────────────────────────
+function selectEmoji(btn) {
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const result = EmotionAI.detectFromEmoji(btn.dataset.emoji);
+  currentMood  = result;
+  EmotionAI.saveMood(result, btn.dataset.emoji);
+  showMoodResult(result);
+}
+
+// ── Text mood detection ─────────────────────────────────────────────
+async function detectMoodFromText() {
+  const text = document.getElementById('moodTextInput').value.trim();
+  if (!text) { alert('Please type how you feel first.'); return; }
+  const result = await EmotionAI.detectMood(text);
+  currentMood  = result;
+  EmotionAI.saveMood(result, text);
+  showMoodResult(result);
+}
+
+function showMoodResult(result) {
+  const emojiMap = { 'Positive':'😊', 'Good':'😌', 'Neutral':'😐', 'Low':'😞', 'Critical':'😰' };
+  const colorMap = { 'Positive':'#10b981','Good':'#6366f1','Neutral':'#f59e0b','Low':'#f97316','Critical':'#ef4444' };
+  const stressColorMap = { 'Low':'#10b981','Moderate':'#f59e0b','High':'#ef4444','Critical':'#ef4444' };
+  const color  = colorMap[result.mood] || '#6366f1';
+  const sColor = stressColorMap[result.stressLevel] || '#f59e0b';
+  const el     = document.getElementById('moodResult');
+  el.className = 'mood-result show';
+  el.style.cssText = `background:${color}12;border-color:${color}30;display:flex;`;
+  el.innerHTML = `
+    <div class="mood-result__emoji">${emojiMap[result.mood] || '😐'}</div>
+    <div>
+      <div class="mood-result__mood" style="color:${color}">${result.mood} Mood</div>
+      <div class="mood-result__stress">Stress Level: <span style="color:${sColor};font-weight:700">${result.stressLevel}</span>
+        ${result.source === 'rule_engine' ? `· ${result.keywordsFound} keyword(s) detected` : ''}
+      </div>
+    </div>
+    <div class="mood-result__score" style="color:${color}">${result.rawScore}<span style="font-size:.7rem;font-weight:500">/100</span></div>`;
+  renderMoodHistoryChart();
+}
+
+// ── Main engine runner ──────────────────────────────────────────────
+function runPersonalizationEngine() {
+  const btn     = document.getElementById('peRunBtn');
+  btn.disabled  = true;
+  btn.textContent = '⏳ Generating your plan…';
+
+  const metrics = getMetrics();
+
+  // 1. Goal Engine — adjust goals based on metrics
+  GoalEngine.initGoals();
+  renderGoalCards(metrics);
+
+  // 2. Plan Generator
+  currentPlan = PlanGenerator.generateDailyPlan(metrics, currentMood);
+  PlanGenerator.savePlan(currentPlan);
+  renderDailyPlan(currentPlan);
+
+  // 3. Quick Actions
+  renderQuickActions(metrics);
+
+  btn.innerHTML  = '✅ Plan Generated — Re-run Anytime';
+  btn.disabled   = false;
+}
+
+// ── Goal Cards ──────────────────────────────────────────────────────
+function renderGoalCards(metrics) {
+  const goals = GoalEngine.getGoals();
+  const types = Object.keys(goals);
+  const grid  = document.getElementById('goalGrid');
+  grid.innerHTML = '';
+  grid.style.gridTemplateColumns = `repeat(${Math.min(3, types.length)},1fr)`;
+
+  types.forEach(type => {
+    const goal = goals[type];
+    const cat  = GoalEngine.GOAL_CATALOGUE[type];
+    if (!cat || !goal) return;
+
+    // Run adaptive adjustment with current metrics for context
+    const pct = goal.completionRate || 0;
+    const adj = GoalEngine.adjustGoal({ goalType: type, target: goal.target, completionRate: pct, streak: goal.streak || 0 });
+
+    const card = document.createElement('div');
+    card.className = 'pe-card goal-card';
+    const dirArrow = !adj ? '' : adj.direction > 0 ? '↑' : adj.direction < 0 ? '↓' : '→';
+    const dirColor = !adj ? '#6366f1' : adj.direction > 0 ? '#10b981' : adj.direction < 0 ? '#f59e0b' : '#6366f1';
+    const streakHtml = goal.streak > 0
+      ? `<div class="goal-streak">🔥 ${goal.streak}-day streak</div>`
+      : `<div class="goal-streak" style="color:var(--pe-text3)">No streak yet</div>`;
+
+    card.innerHTML = `
+      <div class="goal-card__top">
+        <div class="goal-icon">${cat.icon}</div>
+        <div><div class="goal-name">${cat.label}</div><div class="goal-cat">${cat.category}</div></div>
+        <div class="goal-target">
+          <div class="goal-target__val">${goal.target}<span style="font-size:.8rem;font-weight:500;color:var(--pe-text3);margin-left:2px">${cat.unit}</span></div>
+          <div class="goal-target__unit" style="color:${dirColor}">${dirArrow} ${adj ? adj.newTarget + cat.unit : ''}</div>
+        </div>
+      </div>
+      <div class="goal-progress-track">
+        <div class="goal-progress-fill" id="gbar_${type}" style="width:0"></div>
+      </div>
+      <div class="goal-footer">
+        <div class="goal-pct" style="color:${pct>=70?'#10b981':pct>=50?'#f59e0b':'#ef4444'}">${pct}% complete</div>
+        ${streakHtml}
+      </div>
+      ${adj ? `<div class="goal-msg">${adj.message}</div>` : ''}
+      <button class="goal-log-btn" onclick="openGoalLog('${type}')">📝 Log Today's Progress</button>`;
+    grid.appendChild(card);
+
+    // Animate bar
+    setTimeout(() => {
+      const bar = document.getElementById('gbar_' + type);
+      if (bar) bar.style.width = pct + '%';
+    }, 200);
+  });
+}
+
+// ── Goal logging ────────────────────────────────────────────────────
+function openGoalLog(type) {
+  activeLogGoalType = type;
+  const cat = GoalEngine.GOAL_CATALOGUE[type];
+  document.getElementById('logGoalLabel').textContent = `${cat.icon} ${cat.label} (${cat.measureHint})`;
+  document.getElementById('logActualInput').placeholder = `Enter actual ${cat.unit}`;
+  document.getElementById('goalLogPanel').style.display = 'block';
+  document.getElementById('logResult').textContent = '';
+  document.getElementById('logActualInput').focus();
+  document.getElementById('goalLogPanel').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+function closeGoalLog() { document.getElementById('goalLogPanel').style.display = 'none'; activeLogGoalType = null; }
+function submitGoalLog() {
+  if (!activeLogGoalType) return;
+  const val = parseFloat(document.getElementById('logActualInput').value);
+  if (isNaN(val)) { document.getElementById('logResult').textContent = '⚠️ Please enter a valid number.'; return; }
+  const { goal, adjustment } = GoalEngine.logCompletion(activeLogGoalType, val);
+  document.getElementById('logResult').innerHTML =
+    `✅ Logged! Completion: <strong>${goal.completionRate}%</strong> · Streak: 🔥 ${goal.streak} days<br>
+     <em style="color:#c4b5fd">${adjustment.message}</em><br>
+     <small style="color:var(--pe-text3)">New target: ${adjustment.newTarget} ${GoalEngine.GOAL_CATALOGUE[activeLogGoalType].unit}</small>`;
+  setTimeout(() => { closeGoalLog(); renderGoalCards(getMetrics()); }, 2800);
+}
+
+// ── Daily Plan ──────────────────────────────────────────────────────
+function renderDailyPlan(plan) {
+  const container = document.getElementById('dailyPlanContainer');
+  if (!plan || plan.length === 0) {
+    container.innerHTML = '<div class="pe-empty"><div class="pe-empty__icon">✅</div><div class="pe-empty__msg">No tasks generated — your wellness metrics look great!</div></div>';
+    return;
+  }
+
+  const groups = PlanGenerator.groupBySlot(plan);
+  const priLabels = ['Critical','High','Medium','Low'];
+
+  container.innerHTML = `<div class="timeline">${groups.map(g => `
+    <div class="tl-group">
+      <div class="tl-slot-label">
+        <div class="tl-slot-dot">${g.slot.icon}</div>
+        <div>
+          <div class="tl-slot-name">${g.slot.label}</div>
+          <div class="tl-slot-hours">${g.slot.hours}</div>
+        </div>
+      </div>
+      ${g.tasks.map(t => `
+        <div class="tl-task" id="task_${t.id}" onclick="toggleTask('${t.id}')">
+          <div class="tl-task__icon">${t.icon}</div>
+          <div style="flex:1">
+            <div class="tl-task__title">${t.title}</div>
+            <div class="tl-task__desc">${t.description}</div>
+            <div class="tl-task__meta">
+              <span class="tl-task__dur">⏱ ${t.duration}</span>
+              <span class="tl-task__pri tl-task__pri--${t.priority}">${priLabels[t.priority] || 'Low'}</span>
+              <span class="tl-task__dur">#${t.category}</span>
+            </div>
+          </div>
+        </div>`).join('')}
+    </div>`).join('')}</div>`;
+
+  // Plan stats
+  document.getElementById('planStats').style.display = 'block';
+  document.getElementById('planTaskCount').textContent = plan.length;
+  updatePlanProgress();
+}
+
+function toggleTask(id) {
+  const el = document.getElementById('task_' + id);
+  if (!el) return;
+  el.classList.toggle('done');
+  PlanGenerator.markTaskComplete(id);
+  updatePlanProgress();
+}
+
+function updatePlanProgress() {
+  const all  = document.querySelectorAll('.tl-task').length;
+  const done = document.querySelectorAll('.tl-task.done').length;
+  document.getElementById('planDoneCount').textContent = done;
+  document.getElementById('planPctDone').textContent   = all ? Math.round(done/all*100) + '%' : '0%';
+}
+
+// ── Quick Actions ───────────────────────────────────────────────────
+function renderQuickActions(metrics) {
+  const actions = PlanGenerator.getQuickActions(metrics);
+  document.getElementById('quickActionsGrid').innerHTML = actions.map(a => `
+    <button class="qa-btn" onclick="quickActionFeedback('${a.action}', this)">
+      <span class="qa-btn__icon">${a.icon}</span>${a.text}
+    </button>`).join('');
+}
+function quickActionFeedback(action, btn) {
+  const msgs = {
+    hydration: '💧 Great! Hydration logged. Try to drink at least 8 glasses today.',
+    breathe:   '🧘 Deep breaths reduce cortisol within 60 seconds. Well done!',
+    movement:  '🚶 Even 2 minutes of movement boosts blood flow and focus.',
+    sleep:     '🌙 Reducing screen time tonight will improve your sleep depth.',
+    screen:    '👁️ 20-20-20 reduces eye strain by ~50%. Do it every hour.',
+    gratitude: '🙏 Gratitude practice rewires the brain toward positive expectation.',
+    nature:    '🌿 Nature exposure measurably lowers cortisol. Go for it!',
+  };
+  const fb = document.getElementById('qaFeedback');
+  fb.textContent = msgs[action] || '✅ Great choice! Keep it up.';
+  fb.style.display = 'block';
+  btn.style.background = 'rgba(16,185,129,.15)';
+  btn.style.borderColor = 'rgba(16,185,129,.35)';
+  setTimeout(() => { fb.style.display = 'none'; btn.style.background = ''; btn.style.borderColor = ''; }, 4000);
+}
+
+// ── Mood History Chart ──────────────────────────────────────────────
+function renderMoodHistoryChart() {
+  const canvas = document.getElementById('moodHistoryChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+  if (moodChart) { moodChart.destroy(); moodChart = null; }
+
+  const history = EmotionAI.getHistory(7);
+  if (history.length < 2) return;
+
+  const labels  = history.map(h => h.date.slice(5));
+  const data    = history.map(h => h.rawScore);
+  const colors  = data.map(s => EmotionAI.scoreToColor(s));
+
+  const ctx  = canvas.getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,0,180);
+  grad.addColorStop(0,'rgba(139,92,246,.3)');
+  grad.addColorStop(1,'rgba(139,92,246,.02)');
+
+  moodChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Mood Score',
+        data, borderColor:'#8b5cf6', backgroundColor: grad,
+        borderWidth:2.5, fill:true, tension:.4,
+        pointBackgroundColor: colors, pointBorderColor:'#07090f',
+        pointRadius:5, pointBorderWidth:2
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      scales: {
+        y: { min:0, max:100, ticks:{color:'#94a3b8',callback:v=>v+'%'}, grid:{color:'rgba(255,255,255,.05)'} },
+        x: { ticks:{color:'#94a3b8'}, grid:{display:false} }
+      },
+      plugins: {
+        legend:{display:false},
+        tooltip:{ backgroundColor:'rgba(7,9,15,.95)', titleColor:'#f1f5f9', bodyColor:'#94a3b8',
+          borderColor:'#8b5cf6', borderWidth:1, padding:10,
+          callbacks:{label:ctx=>`Mood Score: ${ctx.raw}%`} }
+      }
+    }
+  });
+}
+
+// ── Auto-init on load ───────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  sliderCfg.forEach(s => updateFill(document.getElementById(s.id)));
+
+  // Seed demo data if no real data
+  const hasGoals = Object.keys(GoalEngine.getGoals()).length > 0;
+  const hasMood  = EmotionAI.getHistory(1).length > 0;
+
+  if (!hasGoals) {
+    GoalEngine.seedDemoGoals();
+    document.getElementById('peDemoBanner').style.display = 'block';
+  }
+  if (!hasMood) {
+    EmotionAI.seedDemoHistory();
+  }
+
+  // Load existing mood
+  const latestMood = EmotionAI.getLatest();
+  if (latestMood) {
+    currentMood = latestMood;
+    showMoodResult(latestMood);
+  } else {
+    renderMoodHistoryChart();
+  }
+
+  // If there's existing goal data, render goals immediately
+  renderGoalCards(getMetrics());
+
+  // Check for saved plan from today
+  const savedPlan = PlanGenerator.getTodaysPlan();
+  if (savedPlan && savedPlan.tasks) {
+    currentPlan = savedPlan.tasks;
+    renderDailyPlan(currentPlan);
+    renderQuickActions(getMetrics());
+  }
+});
+</script>
+</body>
+</html>

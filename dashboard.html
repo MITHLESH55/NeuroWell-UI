@@ -294,6 +294,9 @@
         <!-- Overview Cards -->
         <section id="overviewCards" class="mb-lg"></section>
 
+        <!-- Intelligent Insights (Main Problem · Focus · Alerts · Highlights) -->
+        <section id="intelligentInsightsSection" class="mb-lg"></section>
+
         <!-- Analytics Grid: Category Comparison & Burnout Gauge -->
         <section class="mb-lg">
           <div class="analytics-grid">
@@ -391,6 +394,17 @@
           </div>
         </section>
 
+        <!-- Daily Check-in Widget -->
+        <section class="card mb-lg" data-animate id="checkinWidget">
+          <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+            <h3>📝 Today's Check-in</h3>
+            <a href="checkin.html" class="btn btn-sm btn-secondary">View Full Log →</a>
+          </div>
+          <div class="card-body" id="dashboardCheckinBody">
+            <p style="color:rgba(226,232,240,0.4);font-size:0.875rem;">Loading check-in status…</p>
+          </div>
+        </section>
+
         <!-- Action Section -->
         <section class="card mb-lg" data-animate>
           <div class="card-header">
@@ -398,15 +412,16 @@
           </div>
           <div class="card-body">
             <div class="next-steps-grid">
-              <a href="recommendations.html" class="btn btn-primary">
-                💡 Get Recommendations
-              </a>
-              <a href="assessment.html" class="btn btn-secondary">
-                🔄 Retake Assessment
-              </a>
-              <button class="btn btn-secondary" id="exportBtn">
-                📥 Export Data
-              </button>
+              <a href="intelligence-module/index.html"  class="btn btn-primary" style="background:linear-gradient(135deg,#667eea,#764ba2);border:none">🧠 Intelligence Module</a>
+              <a href="personalization/index.html"     class="btn btn-primary" style="background:linear-gradient(135deg,#f093fb,#f5576c);border:none">🤖 AI Coach</a>
+              <a href="engagement/index.html"          class="btn btn-primary" style="background:linear-gradient(135deg,#43e97b,#38f9d7);color:#064e3b;border:none">🎮 Engagement Hub</a>
+              <a href="recommendations.html" class="btn btn-primary">💡 Recommendations</a>
+              <a href="goals.html"           class="btn btn-primary">🎯 Track Goals</a>
+              <a href="routine.html"         class="btn btn-primary">📅 Daily Routine</a>
+              <a href="checkin.html"         class="btn btn-primary">📝 Check-in</a>
+              <a href="achievements.html"    class="btn btn-primary">🏆 Achievements</a>
+              <a href="assessment.html"      class="btn btn-secondary">🔄 Retake Assessment</a>
+              <button class="btn btn-secondary" id="exportBtn">📥 Export Data</button>
             </div>
           </div>
         </section>
@@ -421,6 +436,7 @@
   <div id="loader-container"></div>
 
   <!-- Scripts -->
+  <script src="js/utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <script src="data/constants.js"></script>
   <script src="data/questions.js"></script>
@@ -433,7 +449,74 @@
   <script src="js/recommendationEngine.js"></script>
   <script src="js/recommendations.js"></script>
   <script src="js/goals.js"></script>
+  <script src="js/checkin.js"></script>
+  <script src="js/firebaseService.js"></script>
+  <script src="js/alertSystem.js"></script>
+  <script src="js/gamification.js"></script>
+  <script src="js/insights.js"></script>
   <script src="js/app.js"></script>
   <script src="js/dashboard.js"></script>
+
+  <!-- Auth & Alert Integration -->
+  <script>
+    window.addEventListener('DOMContentLoaded', async () => {
+      // 1. Initialize Firebase Service
+      if (typeof FirebaseService !== 'undefined') {
+        await FirebaseService.init();
+        
+        // Check Auth
+        const user = FirebaseService.getCurrentUser();
+        const isDemo = sessionStorage.getItem('nw_demo_mode');
+        
+        if (!user && !isDemo) {
+          window.location.href = 'auth/login.html';
+          return;
+        }
+
+        // Add Logout button to header if user exists
+        if (user) {
+          const header = document.querySelector('.page-hero__content');
+          if (header) {
+            const logoutBtn = document.createElement('button');
+            logoutBtn.textContent = '🚪 Logout';
+            logoutBtn.style.cssText = 'position:absolute;top:0;right:0;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:0.4rem 0.8rem;border-radius:8px;cursor:pointer;font-size:0.8rem;';
+            logoutBtn.onclick = async () => {
+              await FirebaseService.logoutUser();
+              window.location.href = 'auth/login.html';
+            };
+            header.appendChild(logoutBtn);
+          }
+        }
+      }
+
+      // 2. Initialize Alert System
+      if (typeof AlertSystem !== 'undefined') {
+        const alerts = AlertSystem.runFullScan();
+        const unread = AlertSystem.getUnreadCount();
+        
+        if (unread > 0) {
+          const activeAlerts = AlertSystem.getAlerts({ unreadOnly: true });
+          const topAlert = activeAlerts[0];
+          
+          const alertPanel = document.createElement('div');
+          alertPanel.style.cssText = `background:${topAlert.meta.bg}; border:1px solid ${topAlert.meta.border}; border-radius:12px; padding:1rem 1.5rem; margin-bottom:2rem; display:flex; align-items:center; gap:1rem; animation:fadeInUp 0.5s ease-out;`;
+          alertPanel.innerHTML = \`
+            <div style="font-size:2rem;line-height:1;">\${topAlert.meta.icon}</div>
+            <div style="flex:1;">
+              <div style="font-size:0.9rem;font-weight:700;color:\${topAlert.meta.color};text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem;">\${topAlert.title}</div>
+              <div style="font-size:0.85rem;color:rgba(255,255,255,0.85);margin-bottom:0.4rem;">\${topAlert.message}</div>
+              <div style="font-size:0.8rem;color:rgba(255,255,255,0.6);">💡 \${topAlert.advice}</div>
+            </div>
+            <button onclick="AlertSystem.dismissAlert('\${topAlert.id}'); this.parentElement.remove();" style="background:transparent;border:1px solid \${topAlert.meta.border};color:\${topAlert.meta.color};padding:0.4rem 0.8rem;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;">Dismiss</button>
+          \`;
+          
+          const dashboardContainer = document.getElementById('dashboardContainer');
+          if (dashboardContainer && dashboardContainer.firstChild) {
+            dashboardContainer.insertBefore(alertPanel, dashboardContainer.firstChild);
+          }
+        }
+      }
+    });
+  </script>
 </body>
 </html>

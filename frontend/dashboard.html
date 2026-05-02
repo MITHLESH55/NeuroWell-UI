@@ -86,7 +86,7 @@
             <h3>Next Steps</h3>
           </div>
           <div class="card-body">
-            <div class="grid grid-3" style="gap: 1rem;">
+            <div class="grid grid-4" style="gap: 1rem;">
               <a href="recommendations.html" class="btn btn-primary">
                 💡 Get Recommendations
               </a>
@@ -95,6 +95,9 @@
               </a>
               <button class="btn btn-secondary" id="exportBtn">
                 📥 Export Data
+              </button>
+              <button class="btn btn-primary" data-stripe="checkout" style="background: var(--primary-gradient); border: none; font-weight: 700;">
+                💎 Upgrade to Pro
               </button>
             </div>
           </div>
@@ -111,19 +114,37 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <!-- Data -->
   <script src="data/constants.js"></script>
   <script src="data/questions.js"></script>
   <script src="data/rules.js"></script>
+  
+  <!-- Core Management -->
   <script src="js/storage.js"></script>
+  <script src="js/demo.js"></script>
   <script src="js/scoring.js"></script>
   <script src="js/prediction.js"></script>
+  
+  <!-- Utilities & Core Engines -->
+  <script src="js/utility.js"></script>
+  <script src="js/recommendationEngine.js"></script>
+  <script src="js/routineGenerator.js"></script>
+  <script src="js/goalTracker.js"></script>
+  <script src="js/habitsTracker.js"></script>
+  <script src="js/gamification.js"></script>
+  <script src="js/insights.js"></script>
+  <script src="js/alerts.js"></script>
+  
+  <!-- UI & Features -->
   <script src="js/recommendations.js"></script>
+  <script src="js/exportReport.js"></script>
   <script src="js/goals.js"></script>
   <script src="js/booking.js"></script>
   <script src="js/blog.js"></script>
-  <script src="js/exportReport.js"></script>
+  <script src="js/stripe.js"></script>
   <script src="js/app.js"></script>
   <script src="js/dashboard.js"></script>
+
 
   <script>
     // Initialize export data functionality

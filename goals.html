@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wellness Goals - NeuroWell</title>
+  <meta name="description" content="Track your personalised wellness goals — sleep, stress, and activity — with real-time progress updates.">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body { background:linear-gradient(180deg,#0f172a 0%,#020617 100%); min-height:100vh; }
+
+    .goals-hero {
+      position:relative; padding:3rem 1.5rem 1.5rem; text-align:center; overflow:hidden;
+    }
+    .goals-hero::before {
+      content:''; position:absolute; top:-40%; left:50%; transform:translateX(-50%);
+      width:700px; height:700px;
+      background:radial-gradient(circle,rgba(16,185,129,0.08) 0%,transparent 70%);
+      border-radius:50%; z-index:0;
+    }
+    .goals-hero__content { position:relative; z-index:1; animation:fadeInUp 0.7s ease-out both; }
+    .goals-badge {
+      display:inline-flex; align-items:center; gap:0.5rem;
+      padding:0.4rem 1rem; border-radius:999px;
+      background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.25);
+      color:#10b981; font-size:0.78rem; font-weight:600;
+      letter-spacing:0.06em; text-transform:uppercase; margin-bottom:1rem;
+    }
+    .goals-hero h1 { font-size:clamp(2rem,4vw,2.75rem); font-weight:800; letter-spacing:-0.03em; color:#fff; margin-bottom:0.5rem; }
+    .goals-hero p  { color:var(--text-tertiary); max-width:480px; margin:0 auto; font-size:1rem; }
+
+    .goals-wrapper { max-width:900px; margin:0 auto; padding:1rem 1.5rem 5rem; }
+
+    /* ── Stats row ── */
+    .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem; }
+    .stat-pill {
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);
+      border-radius:16px; padding:1.1rem; text-align:center;
+    }
+    .stat-pill-val { font-size:2rem; font-weight:800; }
+    .stat-pill-lbl { font-size:0.72rem; color:rgba(226,232,240,0.5); margin-top:0.25rem; text-transform:uppercase; letter-spacing:0.05em; }
+
+    /* ── Goal card ── */
+    .goal-card {
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+      border-radius:20px; padding:1.75rem; margin-bottom:1.5rem;
+      transition:transform 0.25s, border-color 0.25s;
+    }
+    .goal-card:hover { transform:translateY(-3px); }
+    .goal-card.completed { border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.04); }
+    .goal-card.inactive { opacity:0.5; }
+
+    .gc-header { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-bottom:1.25rem; flex-wrap:wrap; }
+    .gc-left   { display:flex; align-items:center; gap:0.9rem; }
+    .gc-icon   { font-size:2.2rem; line-height:1; }
+    .gc-name   { font-size:1.15rem; font-weight:700; color:#f1f5f9; margin:0 0 0.3rem; }
+    .gc-desc   { font-size:0.82rem; color:rgba(226,232,240,0.6); }
+    .gc-badges { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; }
+
+    .badge-status {
+      padding:0.25rem 0.75rem; border-radius:99px;
+      font-size:0.72rem; font-weight:700; white-space:nowrap;
+    }
+    .badge-cat {
+      padding:0.2rem 0.65rem; border-radius:99px;
+      font-size:0.7rem; font-weight:600;
+      background:rgba(255,255,255,0.06); color:rgba(226,232,240,0.6);
+      border:1px solid rgba(255,255,255,0.1);
+    }
+
+    /* ── Scores row ── */
+    .gc-scores {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.25rem;
+    }
+    .gc-score-box {
+      background:rgba(255,255,255,0.04); border-radius:12px; padding:0.85rem; text-align:center;
+    }
+    .gc-score-val  { font-size:1.6rem; font-weight:800; }
+    .gc-score-lbl  { font-size:0.7rem; color:rgba(226,232,240,0.5); margin-top:0.2rem; text-transform:uppercase; letter-spacing:0.05em; }
+
+    /* ── Progress bar ── */
+    .gc-progress-wrap { margin-bottom:1rem; }
+    .gc-progress-labels { display:flex; justify-content:space-between; font-size:0.78rem; color:rgba(226,232,240,0.5); margin-bottom:0.4rem; }
+    .gc-progress-track {
+      background:rgba(255,255,255,0.07); border-radius:99px; height:10px; overflow:hidden; position:relative;
+    }
+    .gc-progress-fill {
+      height:100%; border-radius:99px;
+      transition:width 1s cubic-bezier(0.4,0,0.2,1);
+      position:relative;
+    }
+    .gc-progress-fill::after {
+      content:''; position:absolute; top:0; left:0; right:0; bottom:0;
+      background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.25) 50%,transparent 100%);
+      animation:shimmer 2s infinite;
+    }
+    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+
+    /* ── Milestones ── */
+    .gc-milestones { display:flex; justify-content:space-between; margin-bottom:1.25rem; position:relative; }
+    .gc-milestones::before {
+      content:''; position:absolute; top:10px; left:0; right:0; height:2px;
+      background:rgba(255,255,255,0.07);
+    }
+    .milestone {
+      display:flex; flex-direction:column; align-items:center; gap:0.3rem;
+      position:relative; z-index:1;
+    }
+    .milestone-dot {
+      width:20px; height:20px; border-radius:50%;
+      border:2px solid rgba(255,255,255,0.15);
+      background:#0f172a; display:flex; align-items:center; justify-content:center;
+      font-size:0.6rem; transition:all 0.4s ease;
+    }
+    .milestone-dot.reached { background:var(--mc,#667eea); border-color:var(--mc,#667eea); color:#fff; }
+    .milestone-lbl { font-size:0.65rem; color:rgba(226,232,240,0.45); }
+
+    /* ── Tip ── */
+    .gc-tip {
+      background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+      border-radius:10px; padding:0.75rem 1rem; font-size:0.825rem;
+      color:rgba(226,232,240,0.65); line-height:1.5; margin-bottom:1rem;
+    }
+    .gc-tip span { color:var(--tip-color,#10b981); font-weight:600; }
+
+    /* ── Actions ── */
+    .gc-actions { display:flex; gap:0.75rem; flex-wrap:wrap; }
+    .btn-xs {
+      padding:0.35rem 0.9rem; border-radius:8px; font-size:0.78rem; font-weight:600;
+      border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.05);
+      color:rgba(226,232,240,0.7); cursor:pointer; transition:all 0.2s;
+    }
+    .btn-xs:hover { background:rgba(255,255,255,0.1); color:#f1f5f9; }
+    .btn-xs.danger:hover { background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.3); color:#ef4444; }
+
+    /* ── Refresh bar ── */
+    .refresh-bar {
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
+      gap:0.75rem; margin-bottom:1.5rem; padding:0.85rem 1.25rem;
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+      border-radius:12px; font-size:0.82rem; color:rgba(226,232,240,0.55);
+    }
+
+    @media(max-width:640px) {
+      .stats-row   { grid-template-columns:repeat(2,1fr); }
+      .gc-scores   { grid-template-columns:repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body data-page="goals">
+  <div id="navbar-container"></div>
+
+  <main>
+    <div class="goals-hero">
+      <div class="goals-hero__content">
+        <span class="goals-badge">🎯 Goal Tracker</span>
+        <h1>Your Wellness <span class="text-accent">Goals</span></h1>
+        <p>Track progress toward sleep, stress, and activity targets in real time</p>
+      </div>
+    </div>
+
+    <div class="goals-wrapper">
+      <!-- Stats row -->
+      <div id="goalsStats"></div>
+
+      <!-- Refresh bar -->
+      <div class="refresh-bar">
+        <span id="lastUpdatedLabel">Loading scores…</span>
+        <button class="btn btn-sm btn-secondary" onclick="refreshGoals()">🔄 Refresh Scores</button>
+      </div>
+
+      <!-- Goal cards -->
+      <div id="goalsContainer"></div>
+
+      <!-- Empty state -->
+      <div id="goalsEmpty" style="display:none;" class="empty-state">
+        <div class="empty-state-icon">🎯</div>
+        <h3>No Assessment Data</h3>
+        <p>Complete a wellness assessment to start tracking your goals.</p>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem;">
+          <a href="assessment.html" class="btn btn-primary">Start Assessment</a>
+          <a href="dashboard.html"  class="btn btn-secondary">← Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-container"></div>
+  <div id="loader-container"></div>
+
+  <script src="js/utils.js"></script>
+  <script src="data/constants.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/goals.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    // ── Goal metadata (tips + milestone labels) ──────────────────────────
+    const GOAL_META = {
+      improve_sleep: {
+        tip: 'Fix your sleep schedule before any other habit. A consistent bedtime is the highest-leverage change you can make.',
+        tipColor: '#667eea',
+        milestones: ['First step','Building','Halfway','Almost!','Done! 🎉']
+      },
+      reduce_stress: {
+        tip: 'Even 10 minutes of daily mindfulness measurably reduces cortisol within 8 weeks. Start today.',
+        tipColor: '#a855f7',
+        milestones: ['First step','Building','Halfway','Almost!','Done! 🎉']
+      },
+      increase_activity: {
+        tip: 'A 20-minute daily walk is the single most evidence-backed physical habit. Start before anything else.',
+        tipColor: '#f59e0b',
+        milestones: ['First step','Building','Halfway','Almost!','Done! 🎉']
+      }
+    };
+
+    // ── Status appearance ────────────────────────────────────────────────
+    const STATUS_STYLE = {
+      completed:   { label:'✓ Completed',   bg:'rgba(16,185,129,0.15)',  color:'#10b981' },
+      in_progress: { label:'→ In Progress', bg:'rgba(59,130,246,0.15)',  color:'#3b82f6' },
+      started:     { label:'↗ Started',     bg:'rgba(245,158,11,0.15)',  color:'#f59e0b' },
+      not_started: { label:'• Not Started', bg:'rgba(148,163,184,0.1)',  color:'#94a3b8' }
+    };
+
+    // ── State ────────────────────────────────────────────────────────────
+    let _scores = null;
+    let _autoRefreshTimer = null;
+
+    // ── Boot ─────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAndRender();
+      // Auto-refresh every 60 seconds
+      _autoRefreshTimer = setInterval(loadAndRender, 60000);
+    });
+
+    function loadAndRender() {
+      try {
+        let scores = null;
+        let isDemo = false;
+
+        if (typeof ScoringEngine !== 'undefined') {
+          try {
+            const r = ScoringEngine.getScoreReport();
+            if (r && r.scores && typeof r.scores.physical === 'number') scores = r.scores;
+          } catch(e) {}
+        }
+
+        if (!scores && typeof StorageManager !== 'undefined') {
+          const saved = StorageManager.getWellnessScore();
+          if (saved && saved.scores && typeof saved.scores.physical === 'number') scores = saved.scores;
+        }
+
+        if (!scores) {
+          if (typeof NeuroUtils !== 'undefined') {
+            scores = NeuroUtils.getDemoData().scores;
+            isDemo = true;
+            NeuroUtils.showDemoBanner();
+          } else {
+            document.getElementById('goalsEmpty').style.display = 'block';
+            return;
+          }
+        }
+
+        _scores = scores;
+
+        // Init + calculate
+        GoalManager.initializeGoals();
+        const goals = GoalManager.calculateGoalProgress(scores);
+
+        renderStats(goals);
+        renderCards(goals, scores);
+        updateLabel();
+
+      } catch (err) {
+        console.error('❌ Goals page error:', err);
+        if (typeof NeuroUtils !== 'undefined') {
+          NeuroUtils.showUIError('Could not load your goals. Please refresh the page.', 'goalsContainer');
+        }
+      }
+    }
+
+    function refreshGoals() {
+      loadAndRender();
+      if (typeof NeuroUtils !== 'undefined') {
+        NeuroUtils.showToast('Goals refreshed with latest scores! ✅', 'success', 2500);
+      }
+    }
+
+    // ── Stats row ────────────────────────────────────────────────────────
+    function renderStats(goals) {
+      const el = document.getElementById('goalsStats');
+      if (!el) return;
+
+      const overall   = GoalManager.getOverallProgress();
+      const completed = GoalManager.getCompletedCount();
+      const total     = GoalManager.getTotalCount();
+      const active    = goals.filter(g => g.isActive).length;
+
+      el.innerHTML = `
+        <div class="stats-row">
+          <div class="stat-pill">
+            <div class="stat-pill-val" style="color:#10b981;">${overall}%</div>
+            <div class="stat-pill-lbl">Overall Progress</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-pill-val" style="color:#6366f1;">${completed}</div>
+            <div class="stat-pill-lbl">Completed</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-pill-val" style="color:#3b82f6;">${active}</div>
+            <div class="stat-pill-lbl">Active Goals</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-pill-val" style="color:#f59e0b;">${total}</div>
+            <div class="stat-pill-lbl">Total Goals</div>
+          </div>
+        </div>`;
+    }
+
+    // ── Goal cards ───────────────────────────────────────────────────────
+    function renderCards(goals, scores) {
+      const el = document.getElementById('goalsContainer');
+      if (!el) return;
+
+      el.innerHTML = goals.map(goal => buildCard(goal, scores)).join('');
+
+      // Animate bars after render
+      setTimeout(() => {
+        goals.forEach(g => {
+          const bar = document.getElementById(`bar-${g.id}`);
+          if (bar) bar.style.width = `${g.progress}%`;
+        });
+      }, 80);
+    }
+
+    function buildCard(goal, scores) {
+      const meta      = GOAL_META[goal.id] || { tip:'Keep working toward your goal!', tipColor:'#10b981', milestones:['25%','50%','75%','100%','Done!'] };
+      const status    = STATUS_STYLE[goal.status] || STATUS_STYLE.not_started;
+      const progress  = goal.progress || 0;
+      const current   = goal.currentScore || scores[goal.currentThreshold] || 0;
+      const target    = goal.targetScore;
+      const baseline  = goal.baselineThreshold;
+      const gap       = Math.max(0, target - current);
+      const barColor  = progress >= 100 ? '#10b981' : progress >= 50 ? '#3b82f6' : progress > 0 ? '#f59e0b' : '#94a3b8';
+
+      // Trend
+      let trendHTML = '';
+      try {
+        const trend = GoalManager.getProgressTrend(goal.id);
+        const tc = { improving:'#10b981', declining:'#ef4444', stable:'#94a3b8' }[trend.trend];
+        trendHTML = `<span style="color:${tc};font-size:0.8rem;font-weight:700;">${trend.direction} ${trend.trend.charAt(0).toUpperCase()+trend.trend.slice(1)}</span>`;
+      } catch(e) {}
+
+      // Milestones (25, 50, 75, 100)
+      const milestonePcts = [25, 50, 75, 100];
+      const milestoneHTML = milestonePcts.map((pct, i) => {
+        const reached = progress >= pct;
+        return `
+          <div class="milestone">
+            <div class="milestone-dot ${reached?'reached':''}" style="--mc:${goal.color};">
+              ${reached ? '✓' : ''}
+            </div>
+            <span class="milestone-lbl">${pct}%</span>
+          </div>`;
+      }).join('');
+
+      const inactiveClass = goal.isActive ? '' : 'inactive';
+      const completedClass = goal.status === 'completed' ? 'completed' : '';
+
+      return `
+        <div class="goal-card ${inactiveClass} ${completedClass}" id="card-${goal.id}" style="border-left:4px solid ${goal.color};">
+          <div class="gc-header">
+            <div class="gc-left">
+              <div class="gc-icon">${goal.icon}</div>
+              <div>
+                <p class="gc-name">${goal.name}</p>
+                <p class="gc-desc">${goal.description}</p>
+              </div>
+            </div>
+            <div class="gc-badges">
+              <span class="badge-cat">${goal.category}</span>
+              <span class="badge-status" style="background:${status.bg};color:${status.color};">${status.label}</span>
+              ${trendHTML}
+            </div>
+          </div>
+
+          <!-- Score boxes -->
+          <div class="gc-scores">
+            <div class="gc-score-box">
+              <div class="gc-score-val" style="color:${goal.color};">${current}</div>
+              <div class="gc-score-lbl">Current</div>
+            </div>
+            <div class="gc-score-box">
+              <div class="gc-score-val" style="color:#f1f5f9;">${target}</div>
+              <div class="gc-score-lbl">Target</div>
+            </div>
+            <div class="gc-score-box">
+              <div class="gc-score-val" style="color:${gap===0?'#10b981':'#f59e0b'};">${gap===0?'✓':gap}</div>
+              <div class="gc-score-lbl">${gap===0?'Reached':'Remaining'}</div>
+            </div>
+          </div>
+
+          <!-- Progress bar -->
+          <div class="gc-progress-wrap">
+            <div class="gc-progress-labels">
+              <span>Progress</span>
+              <span style="color:${barColor};font-weight:700;">${progress}%</span>
+            </div>
+            <div class="gc-progress-track">
+              <div class="gc-progress-fill" id="bar-${goal.id}"
+                style="width:0%;background:linear-gradient(90deg,${goal.color},${barColor});box-shadow:0 0 12px ${barColor}55;">
+              </div>
+            </div>
+          </div>
+
+          <!-- Milestones -->
+          <div class="gc-milestones">${milestoneHTML}</div>
+
+          <!-- Tip -->
+          <div class="gc-tip" style="--tip-color:${meta.tipColor};">
+            <span>💡 Tip:</span> ${meta.tip}
+          </div>
+
+          <!-- Actions -->
+          <div class="gc-actions">
+            <button class="btn-xs" onclick="toggleGoal('${goal.id}')">
+              ${goal.isActive ? '⏸ Pause Goal' : '▶ Resume Goal'}
+            </button>
+            <button class="btn-xs danger" onclick="confirmReset('${goal.id}', '${goal.name}')">
+              🔄 Reset
+            </button>
+            <a href="routine.html" class="btn-xs" style="text-decoration:none;">📅 Daily Routine</a>
+          </div>
+        </div>`;
+    }
+
+    // ── Actions ──────────────────────────────────────────────────────────
+    function toggleGoal(goalId) {
+      const isActive = GoalManager.toggleGoalActive(goalId);
+      loadAndRender();
+      if (typeof NeuroUtils !== 'undefined') {
+        NeuroUtils.showToast(isActive ? 'Goal resumed ▶' : 'Goal paused ⏸', 'info', 2200);
+      }
+    }
+
+    function confirmReset(goalId, goalName) {
+      // No alert() — use inline confirmation via toast + second click
+      const key = `_resetConfirm_${goalId}`;
+      if (sessionStorage.getItem(key)) {
+        GoalManager.resetGoal(goalId);
+        sessionStorage.removeItem(key);
+        loadAndRender();
+        if (typeof NeuroUtils !== 'undefined') {
+          NeuroUtils.showToast(`"${goalName}" has been reset.`, 'warning', 3000);
+        }
+      } else {
+        sessionStorage.setItem(key, '1');
+        setTimeout(() => sessionStorage.removeItem(key), 4000);
+        if (typeof NeuroUtils !== 'undefined') {
+          NeuroUtils.showToast(`Click Reset again to confirm resetting "${goalName}".`, 'warning', 3500);
+        }
+      }
+    }
+
+    function updateLabel() {
+      const el = document.getElementById('lastUpdatedLabel');
+      if (el) el.textContent = `Last updated: ${new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })} · Auto-refreshes every 60 s`;
+    }
+  </script>
+</body>
+</html>

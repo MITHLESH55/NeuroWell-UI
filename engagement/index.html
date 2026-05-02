@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engagement Hub — NeuroWell</title>
+  <meta name="description" content="NeuroWell Engagement Hub: gamification, community, and AI wellness coach.">
+  <link rel="stylesheet" href="../css/engagement.css">
+</head>
+<body class="eg-page">
+
+<div id="egDemoBanner" style="display:none;background:linear-gradient(90deg,#f59e0b,#a855f7);padding:.6rem 1rem;text-align:center;font-size:.8rem;font-weight:600;color:#fff;position:sticky;top:0;z-index:9998">
+  🎭 Demo Mode — <a href="../assessment.html" style="color:#fff;text-decoration:underline">Take the assessment</a> to earn real points
+</div>
+
+<div class="eg-wrap">
+  <!-- Hero -->
+  <div class="eg-hero">
+    <div class="eg-badge">🎮 User Engagement Layer v1.0</div>
+    <h1 class="eg-title">Your <span class="grd">Engagement Hub</span></h1>
+    <p class="eg-sub">Earn points, build streaks, connect with the community, and get real-time coaching.</p>
+  </div>
+  <a href="../dashboard.html" class="eg-back">← Back to Dashboard</a>
+
+  <!-- ── GAMIFICATION ─────────────────────────────────────────── -->
+  <div class="eg-g2 eg-mb">
+    <!-- Level + Stats -->
+    <div class="eg-card">
+      <div class="eg-card__lbl">⭐ Your Progress</div>
+      <div class="level-hero">
+        <div class="level-badge">
+          <div class="level-badge__icon" id="lvlIcon">🌱</div>
+          <div class="level-badge__num">Level <span id="lvlNum">1</span></div>
+          <div class="level-badge__title" id="lvlTitle">Beginner</div>
+        </div>
+        <div class="xp-bar-wrap">
+          <div class="xp-bar-header">
+            <span id="xpLabel">0 XP</span>
+            <span id="xpNext">100 XP to next level</span>
+          </div>
+          <div class="xp-track"><div class="xp-fill" id="xpFill"></div></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-item"><div class="stat-item__val" id="statPoints">0</div><div class="stat-item__lbl">Total Points</div></div>
+          <div class="stat-item"><div class="stat-item__val" id="statStreak">0🔥</div><div class="stat-item__lbl">Day Streak</div></div>
+          <div class="stat-item"><div class="stat-item__val" id="statTasks">0</div><div class="stat-item__lbl">Tasks Done</div></div>
+        </div>
+      </div>
+      <div style="margin-top:1.25rem;display:flex;gap:.65rem;flex-wrap:wrap">
+        <button class="ch-btn" style="margin-top:0;padding:.6rem 1.1rem;font-size:.8rem;width:auto" onclick="recordAction('task_completed')">✅ +Task Done (+15pts)</button>
+        <button class="ch-btn" style="margin-top:0;padding:.6rem 1.1rem;font-size:.8rem;width:auto;background:linear-gradient(135deg,#43e97b,#38f9d7);color:#064e3b" onclick="recordAction('daily_checkin')">📝 Check-in (+10pts)</button>
+        <button class="ch-btn" style="margin-top:0;padding:.6rem 1.1rem;font-size:.8rem;width:auto;background:linear-gradient(135deg,#f093fb,#f5576c)" onclick="shareToComm()">📤 Share Progress (+5pts)</button>
+      </div>
+    </div>
+
+    <!-- Daily Challenge + Points Log -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem">
+      <div class="eg-card challenge-card">
+        <div class="eg-card__lbl">⚡ Daily Challenge</div>
+        <div class="ch-header" id="chHeader"></div>
+        <div id="chContent"></div>
+      </div>
+      <div class="eg-card">
+        <div class="eg-card__lbl">📜 Recent Points</div>
+        <div class="pts-log" id="ptsLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Achievements -->
+  <div class="eg-card eg-mb">
+    <div class="eg-card__lbl">🏅 Achievements</div>
+    <div class="ach-grid" id="achGrid"></div>
+  </div>
+
+  <!-- ── COMMUNITY ─────────────────────────────────────────────── -->
+  <div class="eg-card eg-mb">
+    <div class="eg-card__lbl">🤝 Community Feed</div>
+    <div class="community-tabs">
+      <button class="com-tab active" onclick="switchTab('recent',this)">🕐 Recent</button>
+      <button class="com-tab" onclick="switchTab('trending',this)">🔥 Trending</button>
+      <button class="com-tab" onclick="switchTab('leaderboard',this)">🏆 Leaderboard</button>
+    </div>
+    <!-- Post composer -->
+    <div class="post-composer" id="postComposer">
+      <div class="composer-row">
+        <div class="composer-avatar" id="myAvatar">ME</div>
+        <textarea class="composer-input" id="postInput" placeholder="Share your progress, a tip, or motivate the community..." rows="3"></textarea>
+      </div>
+      <div class="composer-footer">
+        <select class="cat-select" id="postCat">
+          <option value="progress">📈 Progress Share</option>
+          <option value="goal">🎯 Goal Achieved</option>
+          <option value="tip">💡 Wellness Tip</option>
+          <option value="motivation">💪 Motivation</option>
+          <option value="question">🤔 Question</option>
+        </select>
+        <label class="anon-toggle">
+          <input type="checkbox" id="anonCheck" style="accent-color:#8b5cf6"> Post anonymously
+        </label>
+        <button class="post-btn" onclick="submitPost()">✨ Share</button>
+      </div>
+    </div>
+    <!-- Feed / Leaderboard -->
+    <div id="feedContainer"></div>
+  </div>
+
+</div><!-- /eg-wrap -->
+
+<!-- ── CHATBOT ─────────────────────────────────────────────────── -->
+<div class="chat-float" id="chatFloat">
+  <div class="chat-nudge" id="chatNudge" onclick="openChat()" style="display:none"></div>
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <div class="chat-header__icon">🤖</div>
+      <div>
+        <div class="chat-header__title">NeuroWell AI Coach</div>
+        <div class="chat-header__sub">Context-aware wellness guidance</div>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-suggestions" id="chatSuggestions"></div>
+    <div class="chat-input-row">
+      <input class="chat-inp" id="chatInput" placeholder="Ask your AI coach..." maxlength="200"
+        onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="chat-send" onclick="sendChat()">→</button>
+    </div>
+  </div>
+  <button class="chat-toggle-btn" id="chatBtn" onclick="toggleChat()">🤖</button>
+</div>
+
+<script>
+window.CONSTANTS = window.CONSTANTS || {STORAGE:{},SCORE_RANGES:{},BURNOUT_RISK:{},ASSESSMENT:{TOTAL_QUESTIONS:30}};
+window.QUESTIONS  = window.QUESTIONS  || [];
+</script>
+<script src="../js/utils.js"></script>
+<script src="../data/constants.js"></script>
+<script src="../data/questions.js"></script>
+<script src="../js/storage.js"></script>
+<script src="../js/goalEngine.js"></script>
+<script src="../js/emotionAI.js"></script>
+<script src="../js/planGenerator.js"></script>
+<script src="../js/engagementGamification.js"></script>
+<script src="../js/communitySystem.js"></script>
+<script src="../js/wellnessCoach.js"></script>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────
+let chatOpen     = false;
+let currentTab   = 'recent';
+let chatContext  = {};
+
+// ── Init ──────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  EngagementGamification.seedDemo();
+
+  renderGamification();
+  renderChallenge();
+  renderAchievements();
+  renderFeed('recent');
+  initChat();
+
+  // Proactive nudge after 3s
+  setTimeout(() => {
+    const state = EngagementGamification.getState();
+    chatContext  = buildChatContext(state);
+    const nudge  = WellnessCoach.getProactiveNudge(chatContext);
+    const el     = document.getElementById('chatNudge');
+    el.textContent = nudge.msg;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 8000);
+  }, 3000);
+});
+
+// ── Gamification ──────────────────────────────────────────────────
+function renderGamification() {
+  const state    = EngagementGamification.getState();
+  const lvlInfo  = EngagementGamification.calculateLevel(state.points);
+
+  document.getElementById('lvlIcon').textContent  = lvlInfo.icon;
+  document.getElementById('lvlNum').textContent   = lvlInfo.level;
+  document.getElementById('lvlTitle').textContent = lvlInfo.title;
+  document.getElementById('statPoints').textContent = state.points;
+  document.getElementById('statStreak').textContent  = state.streak + (state.streak > 0 ? '🔥' : '');
+  document.getElementById('statTasks').textContent   = state.totalTasksCompleted || 0;
+  document.getElementById('xpLabel').textContent     = state.points + ' XP';
+  document.getElementById('xpNext').textContent      = lvlInfo.nextLevel
+    ? `${lvlInfo.xpForLevel - lvlInfo.xpIntoLevel} XP to Level ${lvlInfo.level + 1}`
+    : '🌟 Max Level!';
+  setTimeout(() => { document.getElementById('xpFill').style.width = lvlInfo.progress + '%'; }, 100);
+
+  // Points log
+  const log = EngagementGamification.getRecentPoints(8);
+  const ACTION_LABELS = {
+    task_completed:'Task Completed', plan_completed:'Full Plan Done',
+    goal_logged:'Goal Logged', daily_checkin:'Daily Check-in',
+    mood_checkin:'Mood Check-in', challenge_complete:'Challenge Done',
+    post_shared:'Post Shared', comment_made:'Comment Made',
+    assessment_done:'Assessment', streak_bonus_7:'7-Day Streak Bonus',
+  };
+  document.getElementById('ptsLog').innerHTML = log.length
+    ? log.map(e => `<div class="pts-entry"><span class="pts-entry__act">${ACTION_LABELS[e.action]||e.action}</span><span class="pts-entry__pts">+${e.pts} pts</span></div>`).join('')
+    : '<div style="color:var(--eg-t3);font-size:.8rem;padding:.5rem">No actions yet — earn your first points!</div>';
+}
+
+function recordAction(action) {
+  const { earned, newAchs, levelInfo } = EngagementGamification.recordAction(action);
+  renderGamification();
+  renderAchievements();
+  // Toast notification
+  showToast(`+${earned} pts earned! ${newAchs.length ? '🏅 Achievement unlocked: ' + newAchs[0].title : ''}`);
+  // Level-up notification
+  const state = EngagementGamification.getState();
+  if (state.level > (levelInfo.level - 1)) renderGamification();
+}
+
+function renderChallenge() {
+  const ch = EngagementGamification.getDailyChallenge();
+  document.getElementById('chHeader').innerHTML = `
+    <div class="ch-icon">${ch.icon}</div>
+    <div>
+      <div class="ch-title">${ch.title}</div>
+      <div class="ch-desc">${ch.desc}</div>
+      <div class="ch-reward">⚡ +${ch.reward} pts reward</div>
+    </div>`;
+  document.getElementById('chContent').innerHTML = ch.completed
+    ? `<div class="ch-done">✅ <span>Challenge complete! You earned <strong>+${ch.reward} pts</strong> today.</span></div>`
+    : `<button class="ch-btn" onclick="completeChallenge()">🎯 Mark as Complete (+${ch.reward} pts)</button>`;
+}
+
+function completeChallenge() {
+  const result = EngagementGamification.completeChallenge();
+  if (!result) return;
+  renderChallenge();
+  renderGamification();
+  renderAchievements();
+  showToast('🏆 Challenge complete! +' + result.earned + ' pts earned!');
+}
+
+function renderAchievements() {
+  const achs = EngagementGamification.getAllAchievements();
+  document.getElementById('achGrid').innerHTML = achs.map(a => `
+    <div class="ach-badge ${a.earned ? 'earned' : 'locked'}" title="${a.desc}">
+      <div class="ach-badge__icon">${a.icon}</div>
+      <div class="ach-badge__title">${a.title}</div>
+      <div class="ach-badge__desc">${a.desc}</div>
+    </div>`).join('');
+}
+
+// ── Community ─────────────────────────────────────────────────────
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.com-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('postComposer').style.display = tab === 'leaderboard' ? 'none' : 'flex';
+  tab === 'leaderboard' ? renderLeaderboard() : renderFeed(tab);
+}
+
+function renderFeed(sort) {
+  const posts = CommunitySystem.getPosts(sort);
+  const catColors = { progress:'#10b981',goal:'#6366f1',tip:'#f59e0b',challenge:'#ef4444',motivation:'#a855f7',question:'#3b82f6' };
+  const avatarColors = ['#667eea','#a855f7','#f43f5e','#10b981','#f59e0b','#3b82f6','#ec4899'];
+  const aColor = (av) => avatarColors[(av.charCodeAt(0) || 0) % avatarColors.length];
+
+  document.getElementById('feedContainer').innerHTML = `<div class="feed">${posts.map(p => {
+    const cat  = CommunitySystem.CATEGORIES[p.category] || { label:p.category, color:'#6366f1' };
+    const isMine = p.id.startsWith('my_');
+    return `<div class="post-card" id="post_${p.id}">
+      <div class="post-header">
+        <div class="post-avatar" style="background:${aColor(p.avatar)}">${p.avatar}</div>
+        <div class="post-meta">
+          <div class="post-user">${p.user} ${isMine ? '(You)' : ''}</div>
+          <div class="post-time">${CommunitySystem.formatTime(p.ts)}</div>
+        </div>
+        <span class="post-cat" style="background:${cat.color}22;color:${cat.color}">${cat.icon} ${cat.label}</span>
+        ${p.trending ? '<span class="post-trending">🔥 Trending</span>' : ''}
+      </div>
+      <div class="post-msg">${p.message}</div>
+      <div class="post-actions">
+        <button class="post-action-btn ${(p.likedBy||[]).includes('local_user') ? 'liked' : ''}" id="like_${p.id}" onclick="toggleLike('${p.id}')">
+          ❤️ <span id="likeCount_${p.id}">${p.likes}</span>
+        </button>
+        <button class="post-action-btn" onclick="toggleComments('${p.id}')">
+          💬 ${p.comments?.length || 0}
+        </button>
+      </div>
+      <div class="post-comments" id="comments_${p.id}">
+        ${(p.comments||[]).map(c => `
+          <div class="comment-item">
+            <span class="comment-user">${c.user}</span>
+            <span class="comment-text">${c.text}</span>
+            <span class="comment-time">${CommunitySystem.formatTime(c.ts)}</span>
+          </div>`).join('')}
+        <div class="comment-input-row">
+          <input class="comment-inp" id="cinp_${p.id}" placeholder="Add a comment..." maxlength="200"
+            onkeydown="if(event.key==='Enter')addComment('${p.id}')">
+          <button class="comment-send" onclick="addComment('${p.id}')">→</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderLeaderboard() {
+  const lb = CommunitySystem.getLeaderboard();
+  const gradients = ['linear-gradient(135deg,#f59e0b,#d97706)','linear-gradient(135deg,#94a3b8,#64748b)','linear-gradient(135deg,#b45309,#92400e)'];
+  document.getElementById('feedContainer').innerHTML = lb.map(e => `
+    <div class="lb-row ${e.isMe ? 'me' : ''}">
+      <div class="lb-rank" style="${e.rank <= 3 ? `background:${gradients[e.rank-1]};-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text` : 'color:var(--eg-t3)'}">${e.rank <= 3 ? ['🥇','🥈','🥉'][e.rank-1] : '#'+e.rank}</div>
+      <div class="lb-av" style="background:linear-gradient(135deg,#667eea,#764ba2)">${e.avatar}</div>
+      <div class="lb-info">
+        <div class="lb-name">${e.user} ${e.isMe ? '(You)' : ''}</div>
+        <div class="lb-sub">Level ${e.level} · 🔥 ${e.streak}-day streak</div>
+      </div>
+      <div class="lb-pts">${e.points} pts</div>
+    </div>`).join('');
+}
+
+function toggleLike(postId) {
+  const result = CommunitySystem.toggleLike(postId);
+  if (!result) return;
+  const btn   = document.getElementById('like_' + postId);
+  const count = document.getElementById('likeCount_' + postId);
+  if (btn)   btn.classList.toggle('liked', result.liked);
+  if (count) count.textContent = result.likes;
+}
+
+function toggleComments(postId) {
+  const el = document.getElementById('comments_' + postId);
+  if (el) el.classList.toggle('open');
+}
+
+function addComment(postId) {
+  const inp = document.getElementById('cinp_' + postId);
+  if (!inp || !inp.value.trim()) return;
+  const comment = CommunitySystem.addComment(postId, inp.value.trim());
+  if (comment) {
+    inp.value = '';
+    const container = document.getElementById('comments_' + postId);
+    const div = document.createElement('div');
+    div.className = 'comment-item';
+    div.innerHTML = `<span class="comment-user">You</span><span class="comment-text">${comment.text}</span>`;
+    container.insertBefore(div, container.querySelector('.comment-input-row'));
+    EngagementGamification.recordAction('comment_made');
+    renderGamification();
+  }
+}
+
+function submitPost() {
+  const msg   = document.getElementById('postInput').value.trim();
+  const cat   = document.getElementById('postCat').value;
+  const anon  = document.getElementById('anonCheck').checked;
+  if (msg.length < 3) { showToast('Please write something before sharing ✏️', 'info'); return; }
+  const post = CommunitySystem.createPost(msg, cat, anon, 'You');
+  if (post) {
+    post.id = 'my_' + post.id;
+    document.getElementById('postInput').value = '';
+    EngagementGamification.recordAction('post_shared');
+    renderGamification();
+    renderFeed('recent');
+    showToast('✅ Post shared! +5 pts earned');
+  }
+}
+
+function shareToComm() {
+  const state = EngagementGamification.getState();
+  CommunitySystem.shareProgress(state);
+  EngagementGamification.recordAction('post_shared');
+  renderGamification();
+  renderFeed('recent');
+  showToast('📤 Progress shared to community! +5 pts');
+}
+
+// ── Chatbot ───────────────────────────────────────────────────────
+function buildChatContext(state) {
+  let sleep = 7, activity = 5, stress = 4;
+  try {
+    const ws = StorageManager.getWellnessScore();
+    if (ws && ws.scores) {
+      stress   = Math.round((100 - ws.scores.mental)  / 10);
+      activity = Math.round(ws.scores.physical / 10);
+    }
+  } catch {}
+  return { sleep, activity, stress, screenTime: 4, streak: state?.streak || 0 };
+}
+
+function initChat() {
+  const state = EngagementGamification.getState();
+  chatContext = buildChatContext(state);
+  addChatMessage('bot', `Hey! 👋 I'm your NeuroWell AI Coach. I know your wellness data and I'm here to help.\n\n${state.streak > 0 ? `You're on a 🔥 ${state.streak}-day streak — fantastic!` : 'Ask me anything about your wellness journey!'}`);
+  renderSuggestions(['How do I manage stress?', 'Show my goals', 'What should I do today?']);
+}
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  const win = document.getElementById('chatWindow');
+  const btn = document.getElementById('chatBtn');
+  win.classList.toggle('open', chatOpen);
+  btn.textContent = chatOpen ? '✕' : '🤖';
+  document.getElementById('chatNudge').style.display = 'none';
+  if (chatOpen) scrollChat();
+}
+
+function openChat() { if (!chatOpen) toggleChat(); }
+
+function addChatMessage(role, text) {
+  const msgs = document.getElementById('chatMessages');
+  const div  = document.createElement('div');
+  div.className = 'chat-msg ' + role;
+  div.innerHTML = role === 'bot'
+    ? `<div class="chat-avatar">🤖</div><div class="chat-bubble">${text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`
+    : `<div class="chat-bubble">${text}</div>`;
+  msgs.appendChild(div);
+  scrollChat();
+}
+
+function scrollChat() {
+  const msgs = document.getElementById('chatMessages');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chatMessages');
+  const div  = document.createElement('div');
+  div.className = 'chat-msg bot'; div.id = 'chatTyping';
+  div.innerHTML = '<div class="chat-avatar">🤖</div><div class="chat-typing"><span></span><span></span><span></span></div>';
+  msgs.appendChild(div); scrollChat();
+}
+function hideTyping() { const el = document.getElementById('chatTyping'); if (el) el.remove(); }
+
+function renderSuggestions(sugs) {
+  document.getElementById('chatSuggestions').innerHTML = sugs.map(s =>
+    `<button class="chat-sug-btn" onclick="useSuggestion('${s.replace(/'/g,"\\'")}')">💬 ${s}</button>`
+  ).join('');
+}
+function useSuggestion(text) {
+  document.getElementById('chatInput').value = text;
+  sendChat();
+}
+
+async function sendChat() {
+  const inp  = document.getElementById('chatInput');
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = '';
+
+  addChatMessage('user', text);
+  showTyping();
+
+  // Simulate typing delay for realism
+  await new Promise(r => setTimeout(r, 900 + Math.random() * 600));
+  hideTyping();
+
+  const mood = EmotionAI.getLatest();
+  const result = await WellnessCoach.chatbotResponse(text, chatContext, { mood });
+  addChatMessage('bot', result.response);
+  renderSuggestions(result.suggestions || []);
+}
+
+// ── Toast ─────────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+  const old = document.getElementById('egToast');
+  if (old) old.remove();
+  const colors = { success:'#10b981', info:'#6366f1', warning:'#f59e0b' };
+  const t = document.createElement('div');
+  t.id = 'egToast';
+  t.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:${colors[type]||colors.success};color:#fff;padding:.75rem 1.5rem;border-radius:12px;font-size:.85rem;font-weight:600;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:egFade .3s ease-out;max-width:90vw;text-align:center`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+</script>
+</body>
+</html>

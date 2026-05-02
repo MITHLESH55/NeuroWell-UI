@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-textMain font-sans antialiased;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-md rounded-2xl;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary to-secondary text-white px-6 py-2 rounded-xl hover:opacity-90 transition-opacity font-semibold shadow-md;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-primary text-primary px-6 py-2 rounded-xl hover:bg-primary/5 transition-colors font-semibold;
+  }
+}
