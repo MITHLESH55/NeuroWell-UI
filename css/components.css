@@ -561,3 +561,26 @@
     width: 100%;
   }
 }
+
+/* ===== STRIPE PRO BUTTON ===== */
+.pro-btn {
+  background: linear-gradient(135deg, #6a11cb, #2575fc) !important;
+  color: white !important;
+  padding: 12px 24px !important;
+  border-radius: 30px !important;
+  border: none !important;
+  cursor: pointer !important;
+  font-weight: bold !important;
+  transition: all 0.3s ease !important;
+  display: inline-block;
+  text-align: center;
+}
+
+.pro-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(106, 17, 203, 0.4);
+}
+
+.pro-btn:active {
+  transform: scale(0.98);
+}

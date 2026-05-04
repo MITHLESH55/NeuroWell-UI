@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing - NeuroWell Wellness Intelligence Platform</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body {
+      background: radial-gradient(circle at top, rgba(102, 126, 234, 0.18), transparent 35%),
+                  linear-gradient(180deg, #0f172a 0%, #020617 100%);
+      min-height: 100vh;
+      color: #f8fafc;
+    }
+    .pricing-container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 8rem 1.5rem 4rem;
+      text-align: center;
+    }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 4rem;
+    }
+    .pricing-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      border-radius: 24px;
+      padding: 3rem 2rem;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .pricing-card.premium {
+      border: 2px solid #6366f1;
+      background: rgba(99, 102, 241, 0.05);
+      transform: scale(1.05);
+    }
+    .pricing-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .price {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 2rem;
+    }
+    .price span {
+      font-size: 1rem;
+      color: #94a3b8;
+    }
+    .features-list {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 2.5rem;
+      text-align: left;
+    }
+    .features-list li {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #cbd5e1;
+    }
+    .features-list li::before {
+      content: "✓";
+      color: #6366f1;
+      font-weight: bold;
+    }
+    .badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <div id="navbar-container"></div>
+
+  <main class="pricing-container">
+    <h1>Simple, Transparent Pricing</h1>
+    <p>Unlock the full potential of your wellness intelligence.</p>
+
+    <div class="pricing-grid">
+      <!-- Free Plan -->
+      <div class="pricing-card">
+        <h3>Free</h3>
+        <div class="price">₹0<span>/forever</span></div>
+        <ul class="features-list">
+          <li>Basic Wellness Assessment</li>
+          <li>Current Score Tracking</li>
+          <li>Standard Recommendations</li>
+          <li>Limited History (7 days)</li>
+        </ul>
+        <a href="assessment.html" class="btn btn-secondary" style="width: 100%;">Start Free</a>
+      </div>
+
+      <!-- Pro Plan -->
+      <div class="pricing-card premium">
+        <div class="badge">Most Popular</div>
+        <h3>Pro 🚀</h3>
+        <div class="price">₹700<span>/one-time</span></div>
+        <ul class="features-list">
+          <li>Advanced AI Assessment</li>
+          <li>30-Day Predictive Forecasting</li>
+          <li>Hyper-Personalized Action Plans</li>
+          <li>Unlimited History Tracking</li>
+          <li>Deep Scan Analytics</li>
+          <li>Priority Support</li>
+        </ul>
+        <button onclick="goToPro()" class="btn btn-primary pro-btn" style="width: 100%; background: linear-gradient(135deg, #6366f1, #a855f7); border: none;">Move to Pro 🚀</button>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-container"></div>
+  <div id="loader-container"></div>
+
+  <script src="data/constants.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/payment.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
