@@ -5,7 +5,7 @@
 -->
 <nav class="navbar" id="mainNavbar">
   <div class="navbar-container">
-    <!-- Left: Brand + Navigation -->
+    <!-- Left: Brand Only -->
     <div class="navbar-left">
       <div class="navbar-brand">
         <svg width="34" height="34" viewBox="0 0 32 32" fill="none">
@@ -22,7 +22,10 @@
         </svg>
         NeuroWell
       </div>
-      
+    </div>
+
+    <!-- Center: Navigation Links -->
+    <div class="navbar-center">
       <ul class="navbar-menu" id="navbarMenu">
         <li><a href="index.html" class="nav-link" data-page="index">Home</a></li>
         <li><a href="about.html" class="nav-link" data-page="about">About</a></li>
@@ -140,12 +143,18 @@
     display: none;
   }
 
+  .navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Consistent gap between buttons */
+  }
+
   @media (max-width: 1100px) {
-    .navbar-center {
-      display: none; /* Hide center menu on smaller screens to prevent crowding */
-    }
     .navbar-left, .navbar-right {
       flex: 1;
+    }
+    .navbar-menu {
+      display: none; /* Hide menu on smaller screens */
     }
   }
 

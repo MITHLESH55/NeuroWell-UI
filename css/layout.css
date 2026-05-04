@@ -26,23 +26,40 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1300px;
-  margin: 0 auto;
-  padding: 0 25px;
   width: 100%;
-  gap: 40px; /* Ensures space between Recommendations and User info */
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 30px;
+  gap: 30px; /* Essential gap between the 3 sections */
 }
 
 .navbar-left {
+  flex: 0 0 auto; /* Don't grow/shrink logo */
   display: flex;
-  align-items: center;
-  gap: 15px; /* Balanced gap between logo and links */
+  justify-content: flex-start;
+}
+
+.navbar-center {
+  flex: 1; /* Take remaining space */
+  display: flex;
+  justify-content: center;
+  min-width: 0; /* Allow shrinking if needed */
 }
 
 .navbar-right {
+  flex: 0 0 auto; /* Don't grow/shrink actions */
   display: flex;
-  align-items: center;
   justify-content: flex-end;
+  gap: 15px;
+}
+
+.navbar-menu {
+  display: flex;
+  gap: 1rem; /* Compact gap for 7 links */
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
 }
 
 .navbar-brand {
