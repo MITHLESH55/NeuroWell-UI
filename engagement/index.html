@@ -17,6 +17,11 @@
   <!-- Hero -->
   <div class="eg-hero">
     <div class="eg-badge">🎮 User Engagement Layer v1.0</div>
+    <div style="position: absolute; top: 1.5rem; right: 1.5rem; z-index: 10;">
+      <button onclick="goToPro()" class="btn btn-primary pro-btn" style="background:linear-gradient(135deg,#8b5cf6,#ec4899);border:none;font-weight:700;padding:0.6rem 1.2rem;border-radius:12px;font-size:0.85rem;display:flex;align-items:center;gap:0.4rem;box-shadow:0 10px 20px rgba(0,0,0,0.2);">
+        <span>💎</span> Move to Pro ₹700
+      </button>
+    </div>
     <h1 class="eg-title">Your <span class="grd">Engagement Hub</span></h1>
     <p class="eg-sub">Earn points, build streaks, connect with the community, and get real-time coaching.</p>
   </div>
@@ -144,6 +149,7 @@ window.QUESTIONS  = window.QUESTIONS  || [];
 <script src="../js/engagementGamification.js"></script>
 <script src="../js/communitySystem.js"></script>
 <script src="../js/wellnessCoach.js"></script>
+<script src="../js/stripe.js"></script>
 
 <script>
 // ── State ─────────────────────────────────────────────────────────
