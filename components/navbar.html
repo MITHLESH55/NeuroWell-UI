@@ -5,72 +5,84 @@
 -->
 <nav class="navbar" id="mainNavbar">
   <div class="navbar-container">
-    <div class="navbar-brand">
-      <svg width="34" height="34" viewBox="0 0 32 32" fill="none">
-        <rect width="32" height="32" rx="10" fill="url(#navGrad)"/>
-        <circle cx="16" cy="10" r="3" fill="white"/>
-        <path d="M16 14v6M12 17h8M13 20c0 1.66 2.24 3 4 3s4-1.34 4-3" 
-              stroke="white" stroke-width="2" stroke-linecap="round"/>
-        <defs>
-          <linearGradient id="navGrad" x1="0" y1="0" x2="32" y2="32">
-            <stop offset="0%" stop-color="#8b5cf6"/>
-            <stop offset="100%" stop-color="#6d28d9"/>
-          </linearGradient>
-        </defs>
-      </svg>
-      NeuroWell
+    <!-- Left: Brand + Navigation -->
+    <div class="navbar-left">
+      <div class="navbar-brand">
+        <svg width="34" height="34" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="10" fill="url(#navGrad)"/>
+          <circle cx="16" cy="10" r="3" fill="white"/>
+          <path d="M16 14v6M12 17h8M13 20c0 1.66 2.24 3 4 3s4-1.34 4-3" 
+                stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="navGrad" x1="0" y1="0" x2="32" y2="32">
+              <stop offset="0%" stop-color="#8b5cf6"/>
+              <stop offset="100%" stop-color="#6d28d9"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        NeuroWell
+      </div>
+      
+      <ul class="navbar-menu" id="navbarMenu">
+        <li><a href="index.html" class="nav-link" data-page="index">Home</a></li>
+        <li><a href="about.html" class="nav-link" data-page="about">About</a></li>
+        <li><a href="services.html" class="nav-link" data-page="services">Services</a></li>
+        <li><a href="contact.html" class="nav-link" data-page="contact">Contact</a></li>
+        <li><a href="assessment.html" class="nav-link" data-page="assessment">Assessment</a></li>
+        <li><a href="dashboard.html" class="nav-link" data-page="dashboard">Dashboard</a></li>
+        <li><a href="recommendations.html" class="nav-link" data-page="recommendations">Recommendations</a></li>
+      </ul>
     </div>
 
-    <ul class="navbar-menu" id="navbarMenu">
-      <li><a href="index.html" class="nav-link" data-page="index">Home</a></li>
-      <li><a href="about.html" class="nav-link" data-page="about">About</a></li>
-      <li><a href="services.html" class="nav-link" data-page="services">Services</a></li>
-      <li><a href="contact.html" class="nav-link" data-page="contact">Contact</a></li>
-      <li><a href="assessment.html" class="nav-link" data-page="assessment">Assessment</a></li>
-      <li><a href="dashboard.html" class="nav-link" data-page="dashboard">Dashboard</a></li>
-      <li><a href="recommendations.html" class="nav-link" data-page="recommendations">Recommendations</a></li>
-    </ul>
-
-    <div class="navbar-actions">
-      <!-- User Menu (Visible when logged in) -->
-      <div id="userMenu" class="user-menu hidden">
-        <div class="user-info">
-          <div class="user-avatar">👤</div>
-          <div class="user-details">
-            <div class="user-name" id="userName">User</div>
-            <div class="user-email" id="userEmail">user@email.com</div>
+    <!-- Right: Actions/User -->
+    <div class="navbar-right">
+      <div class="navbar-actions">
+        <!-- User Menu (Visible when logged in) -->
+        <div id="userMenu" class="user-menu hidden">
+          <div class="user-info">
+            <div class="user-avatar">👤</div>
+            <div class="user-details">
+              <div class="user-name" id="userName">User</div>
+              <div class="user-email" id="userEmail">user@email.com</div>
+            </div>
           </div>
+          <button class="btn btn-danger btn-sm" id="logoutBtn">
+            Logout
+          </button>
         </div>
-        <button class="btn btn-danger btn-sm" id="logoutBtn">
-          Logout
+
+        <!-- Auth Links (Visible when logged out) -->
+        <div id="authLinks" class="auth-links">
+          <a href="login.html" class="btn btn-secondary btn-sm">Login</a>
+          <a href="register.html" class="btn btn-primary btn-sm">Register</a>
+        </div>
+
+        <!-- Reset Button -->
+        <button class="btn btn-secondary btn-sm" id="resetBtn" title="Reset Assessment">
+          <span>↻</span> Reset
+        </button>
+
+        <!-- Pro Button -->
+        <button onclick="goToPro()" class="btn btn-primary btn-sm pro-btn" style="background:linear-gradient(135deg,#8b5cf6,#ec4899);border:none;font-weight:700;display:flex;align-items:center;gap:0.4rem;white-space:nowrap;">
+          <span>💎</span> Move to Pro ₹700
+        </button>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+          <span>☰</span>
         </button>
       </div>
-
-      <!-- Auth Links (Visible when logged out) -->
-      <div id="authLinks" class="auth-links">
-        <a href="login.html" class="btn btn-secondary btn-sm">Login</a>
-        <a href="register.html" class="btn btn-primary btn-sm">Register</a>
-      </div>
-
-      <!-- Reset Button -->
-      <button class="btn btn-secondary btn-sm" id="resetBtn" title="Reset Assessment">
-        <span>↻</span> Reset
-      </button>
-
-      <!-- Pro Button -->
-      <button onclick="goToPro()" class="btn btn-primary btn-sm pro-btn" style="background:linear-gradient(135deg,#8b5cf6,#ec4899);border:none;font-weight:700;margin-right:0.5rem;display:flex;align-items:center;gap:0.4rem;white-space:nowrap;">
-        <span>💎</span> Move to Pro ₹700
-      </button>
-
-      <!-- Mobile Menu Toggle -->
-      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
-        <span>☰</span>
-      </button>
     </div>
   </div>
 </nav>
 
 <style>
+  .navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
   .user-menu {
     display: flex;
     align-items: center;
@@ -128,7 +140,20 @@
     display: none;
   }
 
+  @media (max-width: 1100px) {
+    .navbar-center {
+      display: none; /* Hide center menu on smaller screens to prevent crowding */
+    }
+    .navbar-left, .navbar-right {
+      flex: 1;
+    }
+  }
+
   @media (max-width: 768px) {
+    .navbar-container {
+      padding: 0 15px;
+    }
+
     .user-info {
       gap: 0.5rem;
       padding: 0.4rem;

@@ -26,16 +26,29 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
+  max-width: 1300px;
   margin: 0 auto;
-  padding: 0 var(--spacing-lg);
-  gap: 2rem;
+  padding: 0 25px;
+  width: 100%;
+  gap: 40px; /* Ensures space between Recommendations and User info */
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Balanced gap between logo and links */
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .navbar-brand {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 8px; /* Reduced gap within brand */
   font-size: 1.35rem;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -368,6 +381,12 @@ footer {
 }
 
 /* ===== RESPONSIVE NAVBAR ===== */
+@media (max-width: 1100px) {
+  .navbar-menu {
+    gap: 1rem;
+  }
+}
+
 @media (max-width: 768px) {
   .navbar-menu {
     display: none;
@@ -380,6 +399,11 @@ footer {
     background-color: var(--bg-secondary);
     padding: var(--spacing-lg);
     border-top: 1px solid var(--border-color);
+    z-index: 1001;
+  }
+
+  .navbar-left {
+    flex: 1;
   }
 
   .navbar-menu.active {
