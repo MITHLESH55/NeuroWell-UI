@@ -78,11 +78,11 @@ async def login(credentials: dict = Body(...)):
         user = users_collection.find_one({"email": email})
         if not user:
             print(f"DEBUG: Login failed - user {email} not found")
-            return JSONResponse(status_code=401, content={"success": False, "message": "Invalid email or password"})
-            
+            return JSONResponse(status_code=404, content={"success": False, "message": "User not found"})
+
         if not AuthService.verify_password(password, user["password"]):
-            print(f"DEBUG: Login failed - incorrect password for {email}")
-            return JSONResponse(status_code=401, content={"success": False, "message": "Invalid email or password"})
+            print(f"DEBUG: Login failed - invalid password for {email}")
+            return JSONResponse(status_code=401, content={"success": False, "message": "Invalid password"})
 
         print(f"DEBUG: Login successful for {email}")
         token = AuthService.create_access_token({"email": email, "id": str(user["_id"])})

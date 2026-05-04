@@ -18,10 +18,12 @@ class AuthService:
         return hashed.decode('utf-8')
 
     @staticmethod
-    def verify_password(password: str, hashed_password: str) -> bool:
+    def verify_password(password: str, hashed_password) -> bool:
         """Verify a password against a hashed version."""
         try:
-            return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
+            if isinstance(hashed_password, str):
+                hashed_password = hashed_password.encode('utf-8')
+            return bcrypt.checkpw(password.encode('utf-8'), hashed_password)
         except Exception:
             return False
 

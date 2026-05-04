@@ -6,7 +6,7 @@
 
 const APIService = {
   // ✅ Explicitly set absolute backend URL
-  BASE_URL: 'http://127.0.0.1:8000',
+  BASE_URL: 'https://your-backend-url.onrender.com',
 
   /**
    * Generic fetch wrapper with error handling
@@ -51,7 +51,7 @@ const APIService = {
       console.error('❌ API CONNECTION ERROR:', error);
       
       if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
-        const msg = 'Unable to connect to the server. Please ensure the backend is running at http://127.0.0.1:8000';
+        const msg = 'Unable to connect to the server. Please try again later.';
         alert(msg); // Add alert for immediate visibility
         throw new Error(msg);
       }
