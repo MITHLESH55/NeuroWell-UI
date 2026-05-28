@@ -14,14 +14,14 @@ This system integrates:
 
 ## Features
 
-*  Mental health assessment system
-*  Trend analysis dashboard
-*  Goal tracking module
-*  Recommendation engine
-*  User authentication (Login/Register)
-*  Fully responsive UI
+| Feature           | Description              |
+| ----------------- | ------------------------ |
+| Mood Tracking     | Analyze emotional trends |
+| Goal System       | Set wellness goals       |
+| AI Recommendation | Personalized suggestions |
+| Trend Analytics   | Visual reports           |
+| Authentication    | Secure login system      |
 
----
 
 ##  Tech Stack
 
@@ -35,14 +35,36 @@ This system integrates:
 
 ```
 NeuroWell-UI/
-│── assets/           # Images & static files
-│── components/       # Reusable UI components
-│── css/              # Stylesheets
-│── data/             # Dataset / JSON
-│── js/               # Core logic & AI engine
-│── frontend/         # UI pages
-│── *.html            # Main pages
-```
+│
+├── public/
+│
+├── src/
+│   ├── assets/
+│   ├── components/
+│   ├── pages/
+│   ├── styles/
+│   ├── utils/
+│   ├── services/
+│   ├── data/
+│   ├── ai-engine/
+│   └── auth/
+│
+├── backend/
+│
+├── docs/
+│   ├── screenshots/
+│   ├── diagrams/
+│   └── presentation/
+│
+├── tests/
+│
+├── .github/
+│   └── workflows/
+│       └── deploy.yml
+│
+├── README.md
+├── LICENSE
+└── CONTRIBUTING.md
 
 ---
 
@@ -60,6 +82,20 @@ npx live-server
 ```
 
 ---
+
+🏗 System Architecture
+
+
+User
+ ↓
+Frontend (HTML/CSS/JS)
+ ↓
+AI Recommendation Engine
+ ↓
+Analytics & Trend Module
+ ↓
+Dashboard Visualization
+
 
 ## 📊 Workflow
 
